@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarPomodoro"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/white"
+        app:elevation="1dp"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:title="@string/pomodoro_title"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="16dp">
+
+            <!-- Thẻ gắn kết Task đang tập trung -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFocusTask"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvFocusTaskTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/pomodoro_general_focus"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCompleteTaskFromPomodoro"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="10dp"
+                        android:text="@string/pomodoro_btn_complete_task"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Vòng tròn tiến trình Pomodoro -->
+            <FrameLayout
+                android:layout_width="260dp"
+                android:layout_height="260dp"
+                android:layout_gravity="center">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/circularTimerProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    app:indicatorColor="#FF5722"
+                    app:indicatorSize="260dp"
+                    app:trackColor="#EEEEEE"
+                    app:trackCornerRadius="8dp"
+                    app:trackThickness="12dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.08"
+                        android:text="@string/pomodoro_focus_mode"
+                        android:textColor="#FF5722"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="4dp"
+                        android:text="25:00"
+                        android:textColor="@android:color/black"
+                        android:textSize="54sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvCycleCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hiệp 1 / 4"
+                        android:textColor="#757575"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Cụm nút điều khiển chính: Đặt lại - Bắt đầu/Tạm dừng - Bỏ qua -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnReset"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:text="@string/btn_reset"
+                    android:textSize="14sp"
+                    app:cornerRadius="26dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStartPause"
+                    android:layout_width="140dp"
+                    android:layout_height="52dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:backgroundTint="#FF5722"
+                    android:text="@string/pomodoro_btn_start"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="26dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSkip"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="52dp"
+                    android:text="@string/pomodoro_btn_skip"
+                    android:textSize="14sp"
+                    app:cornerRadius="26dp" />
+            </LinearLayout>
+
+            <!-- Cài đặt thời lượng Tập trung -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="@string/focus_label"
+                android:textColor="#616161"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWork15"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="15m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWork25"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="25m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWork45"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="45m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWorkCustom"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/btn_custom"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Cài đặt thời lượng Nghỉ ngơi -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/break_label"
+                android:textColor="#616161"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBreak5"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="5m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBreak10"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="10m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBreak15"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="15m" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBreakCustom"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="0dp"
+                    android:text="@string/btn_custom"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

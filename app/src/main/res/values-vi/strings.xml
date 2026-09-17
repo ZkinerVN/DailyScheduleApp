@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lịch Trình Hàng Ngày</string>
+
+    <!-- Nút đổi ngôn ngữ -->
+    <string name="lang_current">🌐 VI</string>
+
+    <!-- Màn hình chính -->
+    <string name="greeting_morning">Chào buổi sáng ☀️</string>
+    <string name="greeting_afternoon">Chào buổi chiều 🌤️</string>
+    <string name="greeting_evening">Chào buổi tối 🌙</string>
+    <string name="todays_progress">Tiến độ hôm nay</string>
+    <string name="tasks_completed">Hoàn thành %1$d / %2$d việc</string>
+    <string name="todays_schedule">Lịch trình hôm nay</string>
+    <string name="empty_state">Không có công việc nào trong ngày.\nBấm (+) để thêm việc mới!</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_pomodoro">Đồng hồ</string>
+    <string name="nav_stats">Thống kê</string>
+
+    <!-- Màn hình Thống kê -->
+    <string name="stats_title">Thống kê năng suất</string>
+    <string name="stats_progress_title">Tiến độ hoàn thành</string>
+    <string name="stats_task_count_title">Số lượng công việc</string>
+    <string name="stats_total_tasks">Tổng số công việc:</string>
+    <string name="stats_completed_tasks">Đã hoàn thành:</string>
+    <string name="stats_pending_tasks">Chưa hoàn thành:</string>
+    <string name="stats_priority_distribution">Phân bố theo mức ưu tiên</string>
+    <string name="stats_priority_high">Ưu tiên cao: %1$d</string>
+    <string name="stats_priority_medium">Ưu tiên trung bình: %1$d</string>
+    <string name="stats_priority_low">Ưu tiên thấp: %1$d</string>
+
+    <!-- Danh mục hệ thống -->
+    <string name="cat_sys_study">Học tập</string>
+    <string name="cat_sys_work">Công việc</string>
+    <string name="cat_sys_sport">Thể dục</string>
+    <string name="cat_sys_leisure">Giải trí</string>
+    <string name="cat_sys_personal">Cá nhân</string>
+    <string name="cat_sys_fixed">Lịch cố định</string>
+
+    <!-- Màn hình Thêm/Sửa Task -->
+    <string name="task_title_hint">Tên công việc...</string>
+    <string name="task_desc_hint">Mô tả chi tiết (tuỳ chọn)...</string>
+    <string name="btn_select_date">Chọn ngày</string>
+    <string name="btn_select_time">Chọn giờ</string>
+    <string name="priority_label">Mức ưu tiên:</string>
+    <string name="priority_low">Thấp</string>
+    <string name="priority_medium">Trung bình</string>
+    <string name="priority_high">Cao</string>
+    <string name="category_label">Danh mục:</string>
+    <string name="duration_label">Thời lượng dự kiến (phút):</string>
+    <string name="duration_hint">Ví dụ: 60 (mặc định 60 phút)</string>
+    <string name="include_balance_label">Tính vào thước đo Daily Balance</string>
+    <string name="btn_save_task">Lưu công việc</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="dialog_apply">Áp dụng</string>
+    <string name="dialog_cancel">Hủy</string>
+    <string name="datetime_selected">Thời gian đã chọn: </string>
+    <string name="datetime_not_selected">Thời gian đã chọn: Chưa chọn</string>
+
+    <!-- Thẻ Daily Balance -->
+    <string name="balance_title">Cân bằng năng lượng</string>
+    <string name="balance_focus">Tập trung (Học/Làm)</string>
+    <string name="balance_health">Sức khỏe (Vận động)</string>
+    <string name="balance_leisure">Giải trí (Game/Thư giãn)</string>
+    <string name="filter_all">Tất cả</string>
+
+    <!-- Insights -->
+    <string name="insight_perfect">🌟 Tuyệt vời! Lịch trình hôm nay của bạn rất cân bằng.</string>
+    <string name="insight_overload">⚠️ Quá tải! Hãy cân nhắc dời bớt việc sang ngày mai để tránh kiệt sức.</string>
+    <string name="insight_need_health">💡 Hãy bổ sung ít nhất 30 phút vận động để nạp lại năng lượng nhé.</string>
+    <string name="insight_over_leisure">⚠️ Đã vượt quá thời gian giải trí cho phép. Hãy quay lại mục tiêu chính nào!</string>
+
+    <!-- Thông báo Xóa & Hoàn tác -->
+    <string name="task_deleted">Đã xóa: %1$s</string>
+    <string name="undo">Hoàn tác</string>
+
+    <!-- Hộp thoại tạo Danh mục mới -->
+    <string name="dialog_add_category_title">Thêm danh mục mới</string>
+    <string name="dialog_category_name_hint">Tên danh mục...</string>
+    <string name="dialog_category_type_label">Bản chất năng lượng:</string>
+    <string name="type_focus">🔴 Tập trung (Học/Làm)</string>
+    <string name="type_health">🟢 Sức khỏe (Vận động)</string>
+    <string name="type_leisure">🟡 Giải trí (Game/Thư giãn)</string>
+    <string name="type_personal">⚪ Cá nhân</string>
+    <string name="type_fixed">🔵 Lịch cố định</string>
+    <string name="category_added">Đã thêm danh mục mới!</string>
+    <string name="error_fill_info">Vui lòng nhập tên công việc, chọn ngày và giờ!</string>
+    <string name="category_manage_title">Quản lý danh mục</string>
+    <string name="dialog_delete_category_confirm">Bạn có chắc chắn muốn xóa danh mục \"%1$s\" không?</string>
+    <string name="category_deleted">Đã xóa danh mục thành công</string>
+    <string name="cat_uncategorized">Chưa phân loại</string>
+
+    <!-- Notification Channels & Actions -->
+    <string name="channel_high_name">Công việc khẩn cấp (Ưu tiên Cao)</string>
+    <string name="channel_high_desc">Cảnh báo việc ưu tiên cao với chuông báo thức và ghim thông báo</string>
+    <string name="channel_medium_name">Công việc tiêu chuẩn (Ưu tiên Trung bình)</string>
+    <string name="channel_medium_desc">Thông báo công việc hàng ngày</string>
+    <string name="channel_low_name">Công việc linh hoạt (Ưu tiên Thấp)</string>
+    <string name="channel_low_desc">Nhắc nhở nhẹ nhàng cho các việc linh hoạt</string>
+
+    <string name="notif_urgent_prefix">🚨 KHẨN CẤP: %1$s</string>
+    <string name="notif_normal_prefix">⏰ ĐẾN GIỜ: %1$s</string>
+    <string name="notif_default_content">Đã đến thời gian thực hiện theo lịch trình!</string>
+    <string name="notif_action_done">Đã xong</string>
+    <string name="notif_action_pomodoro">Pomodoro</string>
+    <string name="notif_action_snooze">Hoãn 10p</string>
+    <string name="badge_overdue">QUÁ HẠN</string>
+    <string name="task_snoozed">Đã hoãn báo thức thêm 10 phút</string>
+
+    <!-- DayConfig Quota Settings -->
+    <string name="config_day_title">Cấu hình định mức năng lượng</string>
+    <string name="config_focus_limit_label">Hạn mức Tập trung (phút):</string>
+    <string name="config_health_goal_label">Mục tiêu Sức khỏe (phút):</string>
+    <string name="config_leisure_limit_label">Hạn mức Giải trí (phút):</string>
+    <string name="config_saved">Đã cập nhật định mức ngày thành công</string>
+    <string name="config_preset_normal">Bình thường</string>
+    <string name="config_preset_weekend">Cuối tuần</string>
+    <string name="config_preset_exam">Mùa thi</string>
+    <string name="error_invalid_quota">Vui lòng nhập số phút hợp lệ lớn hơn 0!</string>
+
+    <!-- Pomodoro Timer Controls & Labels -->
+    <string name="pomodoro_title">Phòng tập trung</string>
+    <string name="pomodoro_focus_mode">PHIÊN TẬP TRUNG</string>
+    <string name="pomodoro_break_mode">NGHỈ NGẮN</string>
+    <string name="pomodoro_long_break_mode">NGHỈ DÀI</string>
+    <string name="pomodoro_working_on">Mục tiêu: %1$s</string>
+    <string name="pomodoro_general_focus">Tập trung tự do</string>
+    <string name="pomodoro_cycle_format">Hiệp %1$d / 4</string>
+    <string name="pomodoro_btn_start">Bắt đầu</string>
+    <string name="pomodoro_btn_pause">Tạm dừng</string>
+    <string name="pomodoro_btn_resume">Tiếp tục</string>
+    <string name="pomodoro_btn_skip">Bỏ qua</string>
+    <string name="btn_reset">Đặt lại</string>
+    <string name="focus_label">Thời gian tập trung</string>
+    <string name="break_label">Thời gian giải lao</string>
+    <string name="btn_custom">Tự chọn</string>
+    <string name="pomodoro_btn_complete_task">Đánh dấu hoàn thành</string>
+    <string name="pomodoro_task_completed_toast">Đã đánh dấu hoàn thành công việc!</string>
+    <string name="pomodoro_toast_reset_first">Vui lòng đặt lại đồng hồ trước khi đổi thời gian!</string>
+    <string name="pomodoro_duration_toast">Thiết lập: %1$d phút</string>
+    <string name="pomodoro_dialog_custom_title">Nhập số phút (1 - 180)</string>
+    <string name="pomodoro_dialog_error">Vui lòng nhập số hợp lệ từ 1 đến 180!</string>
+    <string name="pomodoro_notif_focus_done_title">⏰ Đã hoàn thành hiệp tập trung!</string>
+    <string name="pomodoro_notif_focus_done_desc">Làm việc rất xuất sắc! Hãy nghỉ ngơi thư giãn một chút.</string>
+    <string name="pomodoro_notif_break_done_title">☕ Hết giờ nghỉ ngơi!</string>
+    <string name="pomodoro_notif_break_done_desc">Đã nạp đủ năng lượng, cùng vào hiệp tập trung tiếp theo!</string>
+    <!-- Statistics Energy Allocation -->
+    <string name="stats_energy_title">Phân bổ thời gian &amp; năng lượng</string>
+    <string name="stats_focus_invested">Tập trung (Học/Làm):</string>
+    <string name="stats_health_invested">Sức khỏe (Vận động):</string>
+    <string name="stats_leisure_invested">Giải trí (Thư giãn):</string>
+    <!-- Date Navigation -->
+    <string name="schedule_date_header">Lịch trình ngày %1$s</string>
+    <string name="greeting_other_day">Kế hoạch ngày 📅</string>
+</resources>

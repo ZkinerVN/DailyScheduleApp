@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Daily Schedule</string>
+
+    <!-- Language Switch -->
+    <string name="lang_current">🌐 EN</string>
+
+    <!-- Main Screen -->
+    <string name="greeting_morning">Good morning ☀️</string>
+    <string name="greeting_afternoon">Good afternoon 🌤️</string>
+    <string name="greeting_evening">Good evening 🌙</string>
+    <string name="todays_progress">Today\'s Progress</string>
+    <string name="tasks_completed">%1$d of %2$d tasks completed</string>
+    <string name="todays_schedule">Today\'s Schedule</string>
+    <string name="empty_state">No tasks for today.\nTap (+) to create a new one!</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_pomodoro">Pomodoro</string>
+    <string name="nav_stats">Statistics</string>
+
+    <!-- Statistics Screen -->
+    <string name="stats_title">Productivity Statistics</string>
+    <string name="stats_progress_title">Completion Progress</string>
+    <string name="stats_task_count_title">Task Count</string>
+    <string name="stats_total_tasks">Total tasks:</string>
+    <string name="stats_completed_tasks">Completed:</string>
+    <string name="stats_pending_tasks">Pending:</string>
+    <string name="stats_priority_distribution">Priority Distribution</string>
+    <string name="stats_priority_high">High priority: %1$d</string>
+    <string name="stats_priority_medium">Medium priority: %1$d</string>
+    <string name="stats_priority_low">Low priority: %1$d</string>
+
+    <!-- System Categories -->
+    <string name="cat_sys_study">Study</string>
+    <string name="cat_sys_work">Work</string>
+    <string name="cat_sys_sport">Workout</string>
+    <string name="cat_sys_leisure">Entertainment</string>
+    <string name="cat_sys_personal">Personal</string>
+    <string name="cat_sys_fixed">Fixed Schedule</string>
+
+    <!-- Add/Edit Task Screen -->
+    <string name="task_title_hint">Task title...</string>
+    <string name="task_desc_hint">Description (optional)...</string>
+    <string name="btn_select_date">Select Date</string>
+    <string name="btn_select_time">Select Time</string>
+    <string name="priority_label">Priority:</string>
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+    <string name="category_label">Category:</string>
+    <string name="duration_label">Estimated Duration (minutes):</string>
+    <string name="duration_hint">E.g., 60 (default 60 mins)</string>
+    <string name="include_balance_label">Include in Daily Balance</string>
+    <string name="btn_save_task">Save Task</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="dialog_apply">Apply</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="datetime_selected">Selected time: </string>
+    <string name="datetime_not_selected">Selected time: Not selected</string>
+
+    <!-- Daily Balance Card -->
+    <string name="balance_title">Today\'s Balance</string>
+    <string name="balance_focus">Focus (Study/Work)</string>
+    <string name="balance_health">Health &amp; Sport</string>
+    <string name="balance_leisure">Leisure &amp; Gaming</string>
+    <string name="filter_all">All</string>
+
+    <!-- Insights -->
+    <string name="insight_perfect">🌟 Excellent! Your schedule is perfectly balanced today.</string>
+    <string name="insight_overload">⚠️ Overload alert! Consider moving some focus tasks to tomorrow.</string>
+    <string name="insight_need_health">💡 Remember to add at least 30 mins of physical activity.</string>
+    <string name="insight_over_leisure">⚠️ Leisure time exceeded limit. Let\'s get back on track!</string>
+
+    <!-- Delete & Undo -->
+    <string name="task_deleted">Deleted: %1$s</string>
+    <string name="undo">Undo</string>
+
+    <!-- Category Dialogs -->
+    <string name="dialog_add_category_title">Add New Category</string>
+    <string name="dialog_category_name_hint">Category name...</string>
+    <string name="dialog_category_type_label">Energy Type:</string>
+    <string name="type_focus">🔴 Focus (Study/Work)</string>
+    <string name="type_health">🟢 Health (Workout)</string>
+    <string name="type_leisure">🟡 Leisure (Gaming/Relax)</string>
+    <string name="type_personal">⚪ Personal</string>
+    <string name="type_fixed">🔵 Fixed Schedule</string>
+    <string name="category_added">Category added successfully!</string>
+    <string name="error_fill_info">Please fill in title, date, and time!</string>
+    <string name="category_manage_title">Manage Categories</string>
+    <string name="dialog_delete_category_confirm">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="category_deleted">Category deleted successfully</string>
+    <string name="cat_uncategorized">Uncategorized</string>
+
+    <!-- Notification Channels & Actions -->
+    <string name="channel_high_name">Urgent Tasks (High Priority)</string>
+    <string name="channel_high_desc">High priority tasks with persistent alerts and alarm sound</string>
+    <string name="channel_medium_name">Standard Tasks (Medium Priority)</string>
+    <string name="channel_medium_desc">Normal daily tasks notification</string>
+    <string name="channel_low_name">Flexible Tasks (Low Priority)</string>
+    <string name="channel_low_desc">Gentle notifications for flexible tasks</string>
+
+    <string name="notif_urgent_prefix">🚨 URGENT: %1$s</string>
+    <string name="notif_normal_prefix">⏰ TIME TO DO: %1$s</string>
+    <string name="notif_default_content">It\'s time for your scheduled task!</string>
+    <string name="notif_action_done">Done</string>
+    <string name="notif_action_pomodoro">Pomodoro</string>
+    <string name="notif_action_snooze">Snooze 10m</string>
+    <string name="badge_overdue">OVERDUE</string>
+    <string name="task_snoozed">Reminder snoozed for 10 minutes</string>
+
+    <!-- DayConfig Quota Settings -->
+    <string name="config_day_title">Energy Quota Configuration</string>
+    <string name="config_focus_limit_label">Focus Limit (minutes):</string>
+    <string name="config_health_goal_label">Health Target (minutes):</string>
+    <string name="config_leisure_limit_label">Leisure Limit (minutes):</string>
+    <string name="config_saved">Day limits updated successfully</string>
+    <string name="config_preset_normal">Normal</string>
+    <string name="config_preset_weekend">Weekend</string>
+    <string name="config_preset_exam">Exam</string>
+    <string name="error_invalid_quota">Please enter valid positive numbers for minutes!</string>
+
+    <!-- Pomodoro Timer Controls & Labels -->
+    <string name="pomodoro_title">Focus Room</string>
+    <string name="pomodoro_focus_mode">FOCUS SESSION</string>
+    <string name="pomodoro_break_mode">SHORT BREAK</string>
+    <string name="pomodoro_long_break_mode">LONG BREAK</string>
+    <string name="pomodoro_working_on">Target: %1$s</string>
+    <string name="pomodoro_general_focus">General Deep Work</string>
+    <string name="pomodoro_cycle_format">Session %1$d / 4</string>
+    <string name="pomodoro_btn_start">Start</string>
+    <string name="pomodoro_btn_pause">Pause</string>
+    <string name="pomodoro_btn_resume">Resume</string>
+    <string name="pomodoro_btn_skip">Skip</string>
+    <string name="btn_reset">Reset</string>
+    <string name="focus_label">Focus Duration</string>
+    <string name="break_label">Break Duration</string>
+    <string name="btn_custom">Custom</string>
+    <string name="pomodoro_btn_complete_task">Mark Task Done</string>
+    <string name="pomodoro_task_completed_toast">Task completed successfully!</string>
+    <string name="pomodoro_toast_reset_first">Please reset the timer before changing duration!</string>
+    <string name="pomodoro_duration_toast">Set to %1$d minutes</string>
+    <string name="pomodoro_dialog_custom_title">Custom Minutes (1 - 180)</string>
+    <string name="pomodoro_dialog_error">Please enter a valid number between 1 and 180!</string>
+    <string name="pomodoro_notif_focus_done_title">⏰ Focus Session Completed!</string>
+    <string name="pomodoro_notif_focus_done_desc">Outstanding focus! Take a well-deserved rest.</string>
+    <string name="pomodoro_notif_break_done_title">☕ Break Finished!</string>
+    <string name="pomodoro_notif_break_done_desc">Refreshed and ready for the next deep work session!</string>
+    <!-- Statistics Energy Allocation -->
+    <string name="stats_energy_title">Energy &amp; Time Allocation</string>
+    <string name="stats_focus_invested">Focus (Study/Work):</string>
+    <string name="stats_health_invested">Health &amp; Sport:</string>
+    <string name="stats_leisure_invested">Leisure &amp; Relax:</string>
+    <!-- Date Navigation -->
+    <string name="schedule_date_header">Schedule for %1$s</string>
+    <string name="greeting_other_day">Daily Schedule 📅</string>
+</resources>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F7F9"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Tên công việc & Nút Micro giọng nói -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/edtTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/task_title_hint"
+                android:inputType="textCapSentences"
+                android:textSize="16sp" />
+
+            <ImageButton
+                android:id="@+id/btnMicro"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:contentDescription="Nhập bằng giọng nói"
+                app:tint="?attr/colorPrimary" xmlns:app="http://schemas.android.com/apk/res-auto" />
+        </LinearLayout>
+
+        <!-- Mô tả công việc -->
+        <EditText
+            android:id="@+id/edtDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/task_desc_hint"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:textSize="14sp" />
+
+        <!-- Hàng chọn Ngày & Giờ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnSelectDate"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/btn_select_date" />
+
+            <Button
+                android:id="@+id/btnSelectTime"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/btn_select_time" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvDateTimeSelected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/datetime_not_selected"
+            android:textColor="#666666"
+            android:textSize="13sp" />
+
+        <!-- BỔ SUNG: THỜI LƯỢNG & CÔNG TẮC DAILY BALANCE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/white"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/duration_label"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/edtDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/duration_hint"
+                android:inputType="number"
+                android:text="60"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchIncludeInBalance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:checked="true"
+                android:text="@string/include_balance_label"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Chọn mức độ ưu tiên -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/priority_label"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/rgPriority"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <RadioButton
+                android:id="@+id/rbLow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="@string/priority_low"
+                android:textColor="#4CAF50" />
+
+            <RadioButton
+                android:id="@+id/rbMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/priority_medium"
+                android:textColor="#FF9800" />
+
+            <RadioButton
+                android:id="@+id/rbHigh"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/priority_high"
+                android:textColor="#F44336" />
+        </RadioGroup>
+
+        <!-- Chọn danh mục -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_label"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:minHeight="48dp" />
+
+            <ImageButton
+                android:id="@+id/btnAddCategory"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_input_add"
+                android:contentDescription="Thêm danh mục"
+                app:tint="?attr/colorPrimary" />
+
+            <!-- NÚT MỚI: Quản lý & Xóa danh mục -->
+            <ImageButton
+                android:id="@+id/btnManageCategory"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_delete"
+                android:contentDescription="Xóa danh mục"
+                app:tint="#F44336" />
+
+        </LinearLayout>
+
+        <!-- Nút Lưu & Hủy -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="32dp">
+
+            <Button
+                android:id="@+id/btnCancel"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="@string/btn_cancel" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="@string/btn_save_task" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
