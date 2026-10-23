@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9">
+    android:background="@color/app_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:layout_marginBottom="56dp">
 
-        <!-- 1. Header Lời chào, Ngày tháng & Nút Ngôn ngữ -->
+        <!-- 1. Header Lời chào, Ngày tháng & Nút Ngôn ngữ & Cài đặt thông báo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
                     android:id="@+id/tvGreeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
@@ -50,7 +50,7 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@android:drawable/ic_media_previous"
                         android:contentDescription="Previous Day"
-                        app:tint="#757575" />
+                        app:tint="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/tvCurrentDateFull"
@@ -71,7 +71,7 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@android:drawable/ic_media_next"
                         android:contentDescription="Next Day"
-                        app:tint="#757575" />
+                        app:tint="@color/text_secondary" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -84,9 +84,19 @@
                 android:textColor="?attr/colorPrimary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnNotificationSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/notification_settings_title"
+                android:src="@drawable/ic_settings"
+                app:tint="?attr/colorPrimary" />
         </LinearLayout>
 
-        <!-- 2. Thẻ Today's Balance (Đã tích hợp nút Cấu hình DayConfig) -->
+        <!-- 2. Thẻ Today's Balance (Đã tích hợp Cây Năng Lượng & Thẻ Ngày) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,7 +104,7 @@
             android:layout_marginVertical="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
+            app:cardBackgroundColor="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -102,7 +112,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Tiêu đề Cân bằng năng lượng kèm Nút Cài đặt định mức -->
+                <!-- Tiêu đề Cân bằng năng lượng kèm Nút Thẻ Ngày & Nút Cài đặt định mức -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,18 +125,89 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/balance_title"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDailyWrap"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="6dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="0dp"
+                        android:text="@string/daily_wrap_btn"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="12sp"
+                        app:cornerRadius="10dp"
+                        app:strokeColor="?attr/colorPrimary" />
 
                     <ImageButton
                         android:id="@+id/btnConfigDay"
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_menu_manage"
+                        android:src="@android:drawable/ic_menu_preferences"
                         android:contentDescription="@string/config_day_title"
-                        app:tint="#757575" />
+                        app:tint="@color/text_secondary" />
+                </LinearLayout>
+
+                <!-- Cây Năng Lượng Banner (Bấm vào để mở Thẻ Ngày) -->
+                <LinearLayout
+                    android:id="@+id/layoutPlantBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_plant_banner"
+                    android:padding="12dp"
+                    android:layout_marginBottom="14dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/tvPlantEmoji"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_wrap_plant_circle"
+                        android:text="🌱"
+                        android:textSize="24sp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="4dp">
+
+                        <TextView
+                            android:id="@+id/tvPlantTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/plant_seedling_title"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvPlantSubtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/plant_seedling_desc"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:maxLines="2"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_media_play"
+                        app:tint="@color/text_hint" />
                 </LinearLayout>
 
                 <!-- Thanh FOCUS -->
@@ -228,7 +309,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/insight_perfect"
-                    android:textColor="#555555"
+                    android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:textStyle="italic"
                     android:layout_marginTop="4dp"/>
@@ -259,7 +340,7 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="4dp"
             android:text="@string/todays_schedule"
-            android:textColor="@android:color/black"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -284,7 +365,7 @@
                 android:gravity="center"
                 android:padding="16dp"
                 android:text="@string/empty_state"
-                android:textColor="#888888"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp"
                 android:visibility="gone" />
         </FrameLayout>
@@ -299,14 +380,14 @@
         android:layout_marginBottom="72dp"
         android:contentDescription="Add Task"
         android:src="@android:drawable/ic_input_add"
-        app:tint="@android:color/white" />
+        app:tint="@color/surface" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_gravity="bottom"
-        android:background="@android:color/white"
+        android:background="@color/surface"
         app:elevation="8dp"
         app:menu="@menu/bottom_nav_menu" />
 

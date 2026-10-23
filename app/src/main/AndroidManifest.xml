@@ -9,7 +9,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:allowBackup="true"
@@ -49,11 +52,30 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
 
+        <!-- Màn hình cài đặt thông báo -->
+        <activity
+            android:name=".ui.view.NotificationSettingsActivity"
+            android:exported="false" />
+
+        <!-- Màn hình báo thức toàn màn hình (sáng màn hình khóa, lặp chuông & rung) -->
+        <activity
+            android:name=".ui.view.AlarmAlertActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+
         <!-- BroadcastReceiver xử lý khi đến giờ hẹn báo thức -->
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.dailyscheduleapp.ACTION_TRIGGER_TASK" />
+                <action android:name="com.example.dailyscheduleapp.ACTION_COMPLETE_TASK" />
+                <action android:name="com.example.dailyscheduleapp.ACTION_SNOOZE" />
+            </intent-filter>
+        </receiver>
 
         <!-- BroadcastReceiver khôi phục lại báo thức khi thiết bị khởi động lại -->
         <receiver
@@ -62,8 +84,31 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- Service đếm giờ Pomodoro chạy nền an toàn -->
+        <service
+            android:name=".service.PomodoroService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Pomodoro focus countdown timer and ongoing status notification" />
+        </service>
+
+        <!-- FileProvider để chia sẻ Thẻ Tổng Kết Ngày ra bên ngoài an toàn -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

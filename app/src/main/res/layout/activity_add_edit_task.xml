@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9"
+    android:background="@color/app_background"
     android:padding="16dp">
 
     <LinearLayout
@@ -11,37 +11,24 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Tên công việc & Nút Micro giọng nói -->
-        <LinearLayout
+        <!-- Tên công việc -->
+        <EditText
+            android:id="@+id/edtTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <EditText
-                android:id="@+id/edtTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/task_title_hint"
-                android:inputType="textCapSentences"
-                android:textSize="16sp" />
-
-            <ImageButton
-                android:id="@+id/btnMicro"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_btn_speak_now"
-                android:contentDescription="Nhập bằng giọng nói"
-                app:tint="?attr/colorPrimary" xmlns:app="http://schemas.android.com/apk/res-auto" />
-        </LinearLayout>
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
+            android:hint="@string/task_title_hint"
+            android:inputType="textCapSentences"
+            android:textSize="16sp" />
 
         <!-- Mô tả công việc -->
         <EditText
             android:id="@+id/edtDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
             android:layout_marginTop="12dp"
             android:hint="@string/task_desc_hint"
             android:inputType="textMultiLine"
@@ -61,7 +48,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/btn_select_date" />
+                android:text="@string/btn_select_date"
+                android:textColor="@color/brand_primary"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="24dp" />
 
             <Button
                 android:id="@+id/btnSelectTime"
@@ -70,7 +60,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="@string/btn_select_time" />
+                android:text="@string/btn_select_time"
+                android:textColor="@color/brand_primary"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="24dp" />
         </LinearLayout>
 
         <TextView
@@ -79,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/datetime_not_selected"
-            android:textColor="#666666"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp" />
 
         <!-- BỔ SUNG: THỜI LƯỢNG & CÔNG TẮC DAILY BALANCE -->
@@ -88,7 +81,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_marginTop="16dp"
-            android:background="@android:color/white"
+            android:background="@color/surface"
             android:padding="12dp">
 
             <TextView
@@ -96,13 +89,15 @@
                 android:layout_height="wrap_content"
                 android:text="@string/duration_label"
                 android:textStyle="bold"
-                android:textColor="#333333"
+                android:textColor="@color/text_primary"
                 android:textSize="14sp" />
 
             <EditText
                 android:id="@+id/edtDuration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
                 android:layout_marginTop="4dp"
                 android:hint="@string/duration_hint"
                 android:inputType="number"
@@ -111,6 +106,7 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchIncludeInBalance"
+                android:textColor="@color/text_primary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -121,12 +117,14 @@
 
         <!-- Chọn mức độ ưu tiên -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
+            android:paddingVertical="4dp"
             android:text="@string/priority_label"
-            android:textStyle="bold"
-            android:textSize="14sp" />
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <RadioGroup
             android:id="@+id/rgPriority"
@@ -139,26 +137,41 @@
                 android:id="@+id/rbLow"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0.9"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:singleLine="true"
+                android:textSize="13sp"
                 android:checked="true"
                 android:text="@string/priority_low"
-                android:textColor="#4CAF50" />
+                android:textColor="#2E7D32" />
 
             <RadioButton
                 android:id="@+id/rbMedium"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="1.3"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:singleLine="true"
+                android:textSize="13sp"
                 android:text="@string/priority_medium"
-                android:textColor="#FF9800" />
+                android:textColor="#B45309" />
 
             <RadioButton
                 android:id="@+id/rbHigh"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="0.9"
+                android:minWidth="0dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:singleLine="true"
+                android:textSize="13sp"
                 android:text="@string/priority_high"
-                android:textColor="#F44336" />
+                android:textColor="#C62828" />
         </RadioGroup>
 
         <!-- Chọn danh mục -->
@@ -170,11 +183,14 @@
             android:gravity="center_vertical">
 
             <TextView
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingVertical="4dp"
                 android:text="@string/category_label"
-                android:textStyle="bold"
-                android:textSize="14sp" />
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinnerCategory"
@@ -188,9 +204,12 @@
                 android:id="@+id/btnAddCategory"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:padding="8dp"
+                android:scaleType="centerInside"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_input_add"
-                android:contentDescription="Thêm danh mục"
+                android:contentDescription="@string/cd_add_category"
                 app:tint="?attr/colorPrimary" />
 
             <!-- NÚT MỚI: Quản lý & Xóa danh mục -->
@@ -198,9 +217,12 @@
                 android:id="@+id/btnManageCategory"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:padding="8dp"
+                android:scaleType="centerInside"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_delete"
-                android:contentDescription="Xóa danh mục"
+                android:contentDescription="@string/cd_manage_category"
                 app:tint="#F44336" />
 
         </LinearLayout>
@@ -218,7 +240,10 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
-                android:text="@string/btn_cancel" />
+                android:text="@string/btn_cancel"
+                android:textColor="@color/brand_primary"
+                app:strokeColor="@color/outline"
+                app:cornerRadius="24dp" />
 
             <Button
                 android:id="@+id/btnSave"
@@ -226,8 +251,13 @@
                 android:layout_height="50dp"
                 android:layout_weight="1"
                 android:layout_marginStart="12dp"
-                android:text="@string/btn_save_task" />
+                android:text="@string/btn_save_task"
+                android:backgroundTint="@color/brand_primary"
+                android:textColor="@color/on_brand"
+                app:cornerRadius="24dp" />
         </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
+
+

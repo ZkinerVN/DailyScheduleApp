@@ -1,23 +1,15 @@
 package com.example.dailyscheduleapp.ui.view;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.PowerManager;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
+import android.os.IBinder;
 import android.text.InputType;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,36 +17,56 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
 
 import com.example.dailyscheduleapp.R;
-import com.example.dailyscheduleapp.data.database.AppDatabase;
+import com.example.dailyscheduleapp.service.PomodoroService;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 import java.util.Locale;
 
-public class PomodoroActivity extends AppCompatActivity {
+public class PomodoroActivity extends AppCompatActivity implements PomodoroService.PomodoroListener {
 
-    private static final String CHANNEL_ID = "pomodoro_notification_channel";
-    private static final String CHANNEL_NAME = "Pomodoro Channel";
-
-    private long workTimeMillis = 25 * 60 * 1000;
-    private long breakTimeMillis = 5 * 60 * 1000;
-    private long longBreakTimeMillis = 15 * 60 * 1000;
+    private long workTimeMillis = 25 * 60 * 1000L;
+    private long breakTimeMillis = 5 * 60 * 1000L;
+    private long longBreakTimeMillis = 15 * 60 * 1000L;
     private long totalDurationMillis = workTimeMillis;
     private long timeLeftInMillis = workTimeMillis;
 
-    private int currentCycle = 1; // Hiệp 1 -> 4
+    private int currentCycle = 1;
     private boolean isTimerRunning = false;
     private boolean isWorkMode = true;
+    private boolean isLongBreakMode = false;
 
     private int boundTaskId = -1;
+    private String boundTaskTitle = "";
 
-    private TextView tvMode, tvTimer, tvCycleCount, tvFocusTaskTitle;
-    private MaterialButton btnStartPause, btnReset, btnSkip, btnCompleteTask;
+    private TextView tvMode, tvTimer, tvCycleCount;
+    private MaterialButton btnStartPause, btnReset, btnSkip;
     private CircularProgressIndicator circularProgress;
-    private CountDownTimer countDownTimer;
+
+    private PomodoroService pomodoroService;
+    private boolean isBound = false;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            PomodoroService.PomodoroBinder binder = (PomodoroService.PomodoroBinder) service;
+            pomodoroService = binder.getService();
+            isBound = true;
+            pomodoroService.setListener(PomodoroActivity.this);
+            if (boundTaskId != -1) {
+                pomodoroService.setBoundTask(boundTaskId, boundTaskTitle);
+            }
+            syncStateFromService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            pomodoroService = null;
+            isBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +78,69 @@ public class PomodoroActivity extends AppCompatActivity {
         setupPresetButtons();
 
         btnStartPause.setOnClickListener(v -> {
-            if (isTimerRunning) pauseTimer();
-            else startTimer();
+            ensureServiceStarted();
+            if (pomodoroService != null) {
+                if (pomodoroService.isTimerRunning()) {
+                    pomodoroService.pauseTimer();
+                } else {
+                    pomodoroService.startTimer();
+                }
+            }
         });
 
-        btnReset.setOnClickListener(v -> resetTimer());
-        btnSkip.setOnClickListener(v -> skipToNextSession());
+        btnReset.setOnClickListener(v -> {
+            if (pomodoroService != null) {
+                pomodoroService.resetTimer();
+            }
+        });
 
+        btnSkip.setOnClickListener(v -> {
+            if (pomodoroService != null) {
+                pomodoroService.skipToNextSession();
+            }
+        });
+
+        updateUiThemeAndText();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, PomodoroService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (isBound) {
+            if (pomodoroService != null) {
+                pomodoroService.setListener(null);
+            }
+            unbindService(serviceConnection);
+            isBound = false;
+        }
+    }
+
+    private void ensureServiceStarted() {
+        Intent intent = new Intent(this, PomodoroService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+    }
+
+    private void syncStateFromService() {
+        if (pomodoroService == null) return;
+        this.timeLeftInMillis = pomodoroService.getTimeLeftInMillis();
+        this.totalDurationMillis = pomodoroService.getTotalDurationMillis();
+        this.isTimerRunning = pomodoroService.isTimerRunning();
+        this.isWorkMode = pomodoroService.isWorkMode();
+        this.isLongBreakMode = pomodoroService.isLongBreakMode();
+        this.currentCycle = pomodoroService.getCurrentCycle();
+        this.workTimeMillis = pomodoroService.getWorkTimeMillis();
+        this.breakTimeMillis = pomodoroService.getBreakTimeMillis();
         updateUiThemeAndText();
     }
 
@@ -87,33 +155,19 @@ public class PomodoroActivity extends AppCompatActivity {
         tvMode = findViewById(R.id.tvMode);
         tvTimer = findViewById(R.id.tvTimer);
         tvCycleCount = findViewById(R.id.tvCycleCount);
-        tvFocusTaskTitle = findViewById(R.id.tvFocusTaskTitle);
         circularProgress = findViewById(R.id.circularTimerProgress);
 
         btnStartPause = findViewById(R.id.btnStartPause);
         btnReset = findViewById(R.id.btnReset);
         btnSkip = findViewById(R.id.btnSkip);
-        btnCompleteTask = findViewById(R.id.btnCompleteTaskFromPomodoro);
     }
 
     private void resolveIncomingTaskIntent() {
         boundTaskId = getIntent().getIntExtra("TASK_ID", -1);
-        String taskTitle = getIntent().getStringExtra("TASK_TITLE");
-
-        if (boundTaskId != -1 && taskTitle != null && !taskTitle.isEmpty()) {
-            tvFocusTaskTitle.setText(getString(R.string.pomodoro_working_on, taskTitle));
-            btnCompleteTask.setVisibility(View.VISIBLE);
-            btnCompleteTask.setOnClickListener(v -> {
-                AppDatabase.databaseWriteExecutor.execute(() -> {
-                    AppDatabase.getInstance(this).taskDao().markTaskAsCompleted(boundTaskId);
-                });
-                Toast.makeText(this, getString(R.string.pomodoro_task_completed_toast), Toast.LENGTH_SHORT).show();
-                btnCompleteTask.setEnabled(false);
-                btnCompleteTask.setAlpha(0.6f);
-            });
-        } else {
-            tvFocusTaskTitle.setText(getString(R.string.pomodoro_general_focus));
-            btnCompleteTask.setVisibility(View.GONE);
+        boundTaskTitle = getIntent().getStringExtra("TASK_TITLE");
+        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbarPomodoro);
+        if (toolbar != null && boundTaskTitle != null && !boundTaskTitle.isEmpty()) {
+            toolbar.setSubtitle("🎯 " + boundTaskTitle);
         }
     }
 
@@ -127,33 +181,44 @@ public class PomodoroActivity extends AppCompatActivity {
         findViewById(R.id.btnBreak10).setOnClickListener(v -> setDuration(10, false));
         findViewById(R.id.btnBreak15).setOnClickListener(v -> setDuration(15, false));
         findViewById(R.id.btnBreakCustom).setOnClickListener(v -> showCustomDurationDialog(false));
+
+        updatePresetSelection();
     }
 
     private void setDuration(int minutes, boolean forWork) {
-        if (isTimerRunning) {
+        if (pomodoroService != null && pomodoroService.isTimerRunning()) {
             Toast.makeText(this, getString(R.string.pomodoro_toast_reset_first), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (forWork) {
-            workTimeMillis = (long) minutes * 60 * 1000;
-            if (isWorkMode) {
-                totalDurationMillis = workTimeMillis;
-                timeLeftInMillis = workTimeMillis;
-            }
+            workTimeMillis = (long) minutes * 60 * 1000L;
         } else {
-            breakTimeMillis = (long) minutes * 60 * 1000;
-            if (!isWorkMode) {
-                totalDurationMillis = breakTimeMillis;
-                timeLeftInMillis = breakTimeMillis;
-            }
+            breakTimeMillis = (long) minutes * 60 * 1000L;
         }
-        updateUiThemeAndText();
+
+        if (pomodoroService != null) {
+            pomodoroService.setDurations(workTimeMillis, breakTimeMillis, longBreakTimeMillis);
+        } else {
+            if (forWork) {
+                if (isWorkMode) {
+                    totalDurationMillis = workTimeMillis;
+                    timeLeftInMillis = workTimeMillis;
+                }
+            } else {
+                if (!isWorkMode && !isLongBreakMode) {
+                    totalDurationMillis = breakTimeMillis;
+                    timeLeftInMillis = breakTimeMillis;
+                }
+            }
+            updateUiThemeAndText();
+        }
+
         Toast.makeText(this, getString(R.string.pomodoro_duration_toast, minutes), Toast.LENGTH_SHORT).show();
     }
 
     private void showCustomDurationDialog(boolean forWork) {
-        if (isTimerRunning) {
+        if (pomodoroService != null && pomodoroService.isTimerRunning()) {
             Toast.makeText(this, getString(R.string.pomodoro_toast_reset_first), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -181,82 +246,74 @@ public class PomodoroActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void startTimer() {
-        countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                timeLeftInMillis = millisUntilFinished;
-                updateCountDownText();
-            }
-
-            @Override
-            public void onFinish() {
-                isTimerRunning = false;
-                notifyTimerFinished(isWorkMode);
-                proceedToNextSession();
-            }
-        }.start();
-
-        isTimerRunning = true;
-        btnStartPause.setText(getString(R.string.pomodoro_btn_pause));
+    @Override
+    public void onTick(long timeLeftInMillis, long totalDurationMillis) {
+        this.timeLeftInMillis = timeLeftInMillis;
+        this.totalDurationMillis = totalDurationMillis;
+        updateCountDownText();
     }
 
-    private void pauseTimer() {
-        if (countDownTimer != null) countDownTimer.cancel();
-        isTimerRunning = false;
-        btnStartPause.setText(getString(R.string.pomodoro_btn_resume));
-    }
-
-    private void resetTimer() {
-        if (countDownTimer != null) countDownTimer.cancel();
-        isTimerRunning = false;
-        timeLeftInMillis = totalDurationMillis;
-        btnStartPause.setText(getString(R.string.pomodoro_btn_start));
+    @Override
+    public void onStateChanged(boolean isRunning, boolean isWorkMode, boolean isLongBreakMode, int currentCycle) {
+        this.isTimerRunning = isRunning;
+        this.isWorkMode = isWorkMode;
+        this.isLongBreakMode = isLongBreakMode;
+        this.currentCycle = currentCycle;
         updateUiThemeAndText();
     }
 
-    private void skipToNextSession() {
-        if (countDownTimer != null) countDownTimer.cancel();
-        isTimerRunning = false;
-        proceedToNextSession();
-    }
-
-    private void proceedToNextSession() {
-        if (isWorkMode) {
-            // Hết giờ tập trung -> Chuyển sang nghỉ
-            isWorkMode = false;
-            if (currentCycle >= 4) {
-                totalDurationMillis = longBreakTimeMillis;
-                tvMode.setText(getString(R.string.pomodoro_long_break_mode));
-            } else {
-                totalDurationMillis = breakTimeMillis;
-                tvMode.setText(getString(R.string.pomodoro_break_mode));
-            }
-        } else {
-            // Hết giờ nghỉ -> Vào chu kỳ mới
-            isWorkMode = true;
-            totalDurationMillis = workTimeMillis;
-            if (currentCycle >= 4) currentCycle = 1;
-            else currentCycle++;
-            tvMode.setText(getString(R.string.pomodoro_focus_mode));
-        }
-
-        timeLeftInMillis = totalDurationMillis;
-        btnStartPause.setText(getString(R.string.pomodoro_btn_start));
-        updateUiThemeAndText();
+    @Override
+    public void onSessionCompleted(boolean wasWorkMode) {
+        // Notification, vibration and sound are handled by PomodoroService
     }
 
     private void updateUiThemeAndText() {
         int themeColor = isWorkMode ? Color.parseColor("#FF5722") : Color.parseColor("#388E3C");
 
-        tvMode.setText(isWorkMode ? getString(R.string.pomodoro_focus_mode) : getString(R.string.pomodoro_break_mode));
+        int modeText = isWorkMode
+                ? R.string.pomodoro_focus_mode
+                : (isLongBreakMode
+                ? R.string.pomodoro_long_break_mode
+                : R.string.pomodoro_break_mode);
+        tvMode.setText(modeText);
         tvMode.setTextColor(themeColor);
-        btnStartPause.setBackgroundTintList(ColorStateList.valueOf(themeColor));
+
+        btnStartPause.setText(isTimerRunning ? getString(R.string.pomodoro_btn_pause) : getString(R.string.pomodoro_btn_start));
+        btnStartPause.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.brand_primary)));
+        btnStartPause.setTextColor(getColor(R.color.on_brand));
         circularProgress.setIndicatorColor(themeColor);
 
         tvCycleCount.setText(getString(R.string.pomodoro_cycle_format, currentCycle));
         circularProgress.setMax((int) (totalDurationMillis / 1000));
+        updatePresetSelection();
         updateCountDownText();
+    }
+
+    private void updatePresetSelection() {
+        boolean standardWorkDuration = workTimeMillis == 15 * 60 * 1000L
+                || workTimeMillis == 25 * 60 * 1000L
+                || workTimeMillis == 45 * 60 * 1000L;
+        setPresetSelected(R.id.btnWork15, workTimeMillis == 15 * 60 * 1000L);
+        setPresetSelected(R.id.btnWork25, workTimeMillis == 25 * 60 * 1000L);
+        setPresetSelected(R.id.btnWork45, workTimeMillis == 45 * 60 * 1000L);
+        setPresetSelected(R.id.btnWorkCustom, !standardWorkDuration);
+
+        boolean standardBreakDuration = breakTimeMillis == 5 * 60 * 1000L
+                || breakTimeMillis == 10 * 60 * 1000L
+                || breakTimeMillis == 15 * 60 * 1000L;
+        setPresetSelected(R.id.btnBreak5, breakTimeMillis == 5 * 60 * 1000L);
+        setPresetSelected(R.id.btnBreak10, breakTimeMillis == 10 * 60 * 1000L);
+        setPresetSelected(R.id.btnBreak15, breakTimeMillis == 15 * 60 * 1000L);
+        setPresetSelected(R.id.btnBreakCustom, !standardBreakDuration);
+    }
+
+    private void setPresetSelected(int buttonId, boolean selected) {
+        MaterialButton button = findViewById(buttonId);
+        int backgroundColor = selected ? getColor(R.color.brand_primary) : Color.TRANSPARENT;
+        int textColor = selected ? getColor(R.color.on_brand) : getColor(R.color.brand_primary);
+        button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
+        button.setTextColor(textColor);
+        button.setStrokeColor(ColorStateList.valueOf(getColor(R.color.outline)));
     }
 
     private void updateCountDownText() {
@@ -266,80 +323,5 @@ public class PomodoroActivity extends AppCompatActivity {
 
         tvTimer.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
         circularProgress.setProgress(secondsRemaining);
-    }
-
-    private void notifyTimerFinished(boolean wasWorkMode) {
-        String title = wasWorkMode ? getString(R.string.pomodoro_notif_focus_done_title) : getString(R.string.pomodoro_notif_break_done_title);
-        String content = wasWorkMode ? getString(R.string.pomodoro_notif_focus_done_desc) : getString(R.string.pomodoro_notif_break_done_desc);
-
-        wakeUpScreen();
-        vibrateDevice();
-        playAlarmSound();
-        showHeadsUpNotification(title, content);
-    }
-
-    private void wakeUpScreen() {
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (pm != null) {
-            @SuppressWarnings("deprecation")
-            PowerManager.WakeLock wakeLock = pm.newWakeLock(
-                    PowerManager.FULL_WAKE_LOCK |
-                            PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                            PowerManager.ON_AFTER_RELEASE,
-                    "DailySchedule:PomodoroWakeLock"
-            );
-            wakeLock.acquire(4000);
-        }
-    }
-
-    private void vibrateDevice() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (vibrator != null) {
-            long[] pattern = {0, 500, 200, 500};
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
-            } else {
-                vibrator.vibrate(pattern, -1);
-            }
-        }
-    }
-
-    private void playAlarmSound() {
-        try {
-            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), soundUri);
-            if (ringtone != null) ringtone.play();
-        } catch (Exception ignored) {}
-    }
-
-    private void showHeadsUpNotification(String title, String content) {
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm == null) return;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.enableVibration(true);
-            nm.createNotificationChannel(channel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setAutoCancel(true);
-
-        nm.notify(3003, builder.build());
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (countDownTimer != null) countDownTimer.cancel();
     }
 }

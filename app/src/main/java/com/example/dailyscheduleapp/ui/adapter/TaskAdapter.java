@@ -11,6 +11,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dailyscheduleapp.R;
@@ -20,17 +23,42 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
+public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
 
-    private List<Task> taskList = new ArrayList<>();
     private final Map<Integer, Category> categoryMap = new HashMap<>();
     private OnTaskClickListener listener;
+
+    private static final DiffUtil.ItemCallback<Task> DIFF_CALLBACK = new DiffUtil.ItemCallback<Task>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
+            return oldItem.getId() == newItem.getId();
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
+            return oldItem.isCompleted() == newItem.isCompleted()
+                    && Objects.equals(oldItem.getTitle(), newItem.getTitle())
+                    && Objects.equals(oldItem.getDescription(), newItem.getDescription())
+                    && Objects.equals(oldItem.getDate(), newItem.getDate())
+                    && Objects.equals(oldItem.getTime(), newItem.getTime())
+                    && oldItem.getPriority() == newItem.getPriority()
+                    && oldItem.getCategoryId() == newItem.getCategoryId()
+                    && oldItem.getEstimatedDuration() == newItem.getEstimatedDuration()
+                    && oldItem.getActualDuration() == newItem.getActualDuration()
+                    && oldItem.isIncludeInBalance() == newItem.isIncludeInBalance();
+        }
+    };
+
+    public TaskAdapter() {
+        super(DIFF_CALLBACK);
+    }
 
     public interface OnTaskClickListener {
         void onTaskClick(Task task);
@@ -43,8 +71,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     public void setTasks(List<Task> tasks) {
-        this.taskList = tasks != null ? tasks : new ArrayList<>();
-        notifyDataSetChanged();
+        submitList(tasks != null ? new ArrayList<>(tasks) : null);
     }
 
     public void setCategories(List<Category> categories) {
@@ -54,11 +81,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 categoryMap.put(cat.getId(), cat);
             }
         }
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public Task getTaskAt(int position) {
-        return taskList.get(position);
+        if (position >= 0 && position < getItemCount()) {
+            return getItem(position);
+        }
+        return null;
     }
 
     @NonNull
@@ -70,7 +100,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Task task = taskList.get(position);
+        Task task = getItem(position);
+        if (task == null) return;
         Context context = holder.itemView.getContext();
 
         holder.tvTitle.setText(task.getTitle());
@@ -118,7 +149,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.cardTask.setStrokeWidth(4);
         } else {
             holder.tvOverdue.setVisibility(View.GONE);
-            holder.cardTask.setStrokeColor(Color.parseColor("#EAEAEA"));
+            holder.cardTask.setStrokeColor(ContextCompat.getColor(context, R.color.outline));
             holder.cardTask.setStrokeWidth(2);
         }
 
@@ -128,12 +159,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         if (task.isCompleted()) {
             holder.tvTitle.setPaintFlags(holder.tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.tvTitle.setTextColor(Color.GRAY);
+            holder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text_secondary));
             holder.cardTask.setAlpha(0.55f);
             holder.tvOverdue.setVisibility(View.GONE);
         } else {
             holder.tvTitle.setPaintFlags(holder.tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            holder.tvTitle.setTextColor(Color.BLACK);
+            holder.tvTitle.setTextColor(ContextCompat.getColor(context, R.color.text_primary));
             holder.cardTask.setAlpha(1.0f);
         }
 
@@ -160,19 +191,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         if (task.isCompleted() || task.getDate() == null || task.getTime() == null) {
             return false;
         }
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-            Calendar taskCal = Calendar.getInstance();
-            taskCal.setTime(sdf.parse(task.getDate() + " " + task.getTime()));
-            return taskCal.getTimeInMillis() < System.currentTimeMillis();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
-    public int getItemCount() {
-        return taskList.size();
+        String currentDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
+        return (task.getDate() + " " + task.getTime()).compareTo(currentDateTime) < 0;
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {

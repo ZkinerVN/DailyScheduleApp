@@ -1,7 +1,12 @@
 package com.example.dailyscheduleapp.ui.view;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.net.Uri;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -36,6 +41,8 @@ import com.example.dailyscheduleapp.data.entity.Task;
 import com.example.dailyscheduleapp.ui.adapter.TaskAdapter;
 import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
 import com.example.dailyscheduleapp.utils.AlarmScheduler;
+import com.example.dailyscheduleapp.utils.EnergyPlantHelper;
+import com.example.dailyscheduleapp.utils.NotificationSettings;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -44,6 +51,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,6 +76,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvFocusTime, tvHealthTime, tvLeisureTime, tvInsight;
     private ProgressBar pbFocus, pbHealth, pbLeisure;
     private LinearLayout layoutCategoryChips;
+    private View layoutPlantBanner;
+    private TextView tvPlantEmoji, tvPlantTitle, tvPlantSubtitle;
+    private View btnDailyWrap;
+    private EnergyPlantHelper.EnergyPlantInfo currentPlantInfo;
+    private int lastFocusTotal = 0, lastHealthTotal = 0, lastLeisureTotal = 0;
 
     // Dữ liệu bộ lọc & tính toán
     private final Map<Integer, Category> categoryMap = new HashMap<>();
@@ -82,14 +95,22 @@ public class MainActivity extends AppCompatActivity {
     private LiveData<DayConfig> dayConfigLiveData;
     private LiveData<List<Task>> tasksLiveData;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        int nightMode = getSharedPreferences("app_preferences", MODE_PRIVATE)
+                .getInt("night_mode", AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(nightMode);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestNotificationPermission();
+        NotificationSettings.ensureChannels(this);
+        checkExactAlarmPermission();
+        checkBatteryOptimization();
 
         initViews();
         setupLanguageSwitch();
+        setupNotificationSettingsButton();
         setupRecyclerView();
         setupBottomNav();
 
@@ -145,6 +166,34 @@ public class MainActivity extends AppCompatActivity {
         pbHealth = findViewById(R.id.pbHealth);
         pbLeisure = findViewById(R.id.pbLeisure);
         layoutCategoryChips = findViewById(R.id.layoutCategoryChips);
+        layoutPlantBanner = findViewById(R.id.layoutPlantBanner);
+        tvPlantEmoji = findViewById(R.id.tvPlantEmoji);
+        tvPlantTitle = findViewById(R.id.tvPlantTitle);
+        tvPlantSubtitle = findViewById(R.id.tvPlantSubtitle);
+        btnDailyWrap = findViewById(R.id.btnDailyWrap);
+
+        View.OnClickListener openWrapListener = v -> {
+            if (currentPlantInfo != null) {
+                int completedCount = 0;
+                for (Task t : currentDayTasks) {
+                    if (t.isCompleted()) completedCount++;
+                }
+                String displayDate = tvCurrentDateFull != null ? tvCurrentDateFull.getText().toString() : selectedDate;
+                DailyWrapDialog.show(
+                        MainActivity.this,
+                        displayDate,
+                        currentPlantInfo,
+                        lastFocusTotal,
+                        lastHealthTotal,
+                        lastLeisureTotal,
+                        completedCount,
+                        currentDayTasks.size()
+                );
+            }
+        };
+
+        if (layoutPlantBanner != null) layoutPlantBanner.setOnClickListener(openWrapListener);
+        if (btnDailyWrap != null) btnDailyWrap.setOnClickListener(openWrapListener);
     }
 
     private void setupDateNavigation() {
@@ -212,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         if (dayConfigLiveData != null) {
             dayConfigLiveData.removeObservers(this);
         }
-        dayConfigLiveData = AppDatabase.getInstance(this).dayConfigDao().getDayConfig(selectedDate);
+        dayConfigLiveData = taskViewModel.getDayConfig(selectedDate);
         dayConfigLiveData.observe(this, config -> {
             if (config != null) {
                 currentDayConfig = config;
@@ -230,19 +279,17 @@ public class MainActivity extends AppCompatActivity {
         tasksLiveData.observe(this, tasks -> {
             currentDayTasks = tasks != null ? tasks : new ArrayList<>();
 
-            long nowMillis = System.currentTimeMillis();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            String nowDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(new Date());
 
             Collections.sort(currentDayTasks, (t1, t2) -> {
                 if (t1.isCompleted() != t2.isCompleted()) {
                     return t1.isCompleted() ? 1 : -1;
                 }
 
-                boolean t1Overdue = false, t2Overdue = false;
-                try {
-                    t1Overdue = !t1.isCompleted() && sdf.parse(t1.getDate() + " " + t1.getTime()).getTime() < nowMillis;
-                    t2Overdue = !t2.isCompleted() && sdf.parse(t2.getDate() + " " + t2.getTime()).getTime() < nowMillis;
-                } catch (Exception ignored) {}
+                String dt1 = (t1.getDate() != null ? t1.getDate() : "") + " " + (t1.getTime() != null ? t1.getTime() : "");
+                String dt2 = (t2.getDate() != null ? t2.getDate() : "") + " " + (t2.getTime() != null ? t2.getTime() : "");
+                boolean t1Overdue = !t1.isCompleted() && dt1.compareTo(nowDateTime) < 0;
+                boolean t2Overdue = !t2.isCompleted() && dt2.compareTo(nowDateTime) < 0;
 
                 if (t1Overdue != t2Overdue) {
                     return t1Overdue ? -1 : 1;
@@ -276,7 +323,20 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+    private void setupNotificationSettingsButton() {
+        View btnNotificationSettings =
+                findViewById(R.id.btnNotificationSettings);
 
+        if (btnNotificationSettings != null) {
+            btnNotificationSettings.setOnClickListener(v -> {
+                Intent intent = new Intent(
+                        MainActivity.this,
+                        NotificationSettingsActivity.class
+                );
+                startActivity(intent);
+            });
+        }
+    }
     private void setupBottomNav() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_home);
@@ -299,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
         rvTasks.setAdapter(adapter);
 
         adapter.setOnTaskClickListener(new TaskAdapter.OnTaskClickListener() {
-            @Override
+        
             public void onTaskClick(Task task) {
                 Intent intent = new Intent(MainActivity.this, AddEditTaskActivity.class);
                 intent.putExtra("EXTRA_ID", task.getId());
@@ -311,15 +371,17 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("EXTRA_CATEGORY_ID", task.getCategoryId());
                 intent.putExtra("EXTRA_DURATION", task.getEstimatedDuration());
                 intent.putExtra("EXTRA_INCLUDE_BALANCE", task.isIncludeInBalance());
+                intent.putExtra("EXTRA_IS_COMPLETED", task.isCompleted());
+                intent.putExtra("EXTRA_ACTUAL_DURATION", task.getActualDuration());
                 startActivity(intent);
             }
 
-            @Override
+        
             public void onTaskDelete(Task task) {
                 deleteTaskWithUndo(task);
             }
 
-            @Override
+        
             public void onTaskStatusChanged(Task task, boolean isCompleted) {
                 task.setCompleted(isCompleted);
                 taskViewModel.updateTask(task);
@@ -433,6 +495,28 @@ public class MainActivity extends AppCompatActivity {
             tvInsight.setText(getString(R.string.insight_perfect));
             tvInsight.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
         }
+
+        lastFocusTotal = focusTotal;
+        lastHealthTotal = healthTotal;
+        lastLeisureTotal = leisureTotal;
+
+        int completedCount = 0;
+        for (Task t : currentDayTasks) {
+            if (t.isCompleted()) completedCount++;
+        }
+
+        currentPlantInfo = EnergyPlantHelper.calculatePlantInfo(
+                focusTotal, limitFocus,
+                healthTotal, goalHealth,
+                leisureTotal, limitLeisure,
+                completedCount, currentDayTasks.size()
+        );
+
+        if (tvPlantEmoji != null) tvPlantEmoji.setText(currentPlantInfo.emoji);
+        if (tvPlantTitle != null) tvPlantTitle.setText(getString(currentPlantInfo.titleResId));
+        if (tvPlantSubtitle != null) {
+            tvPlantSubtitle.setText(getString(currentPlantInfo.descResId) + " (" + currentPlantInfo.balanceScore + "%)");
+        }
     }
 
     private void showDayConfigDialog() {
@@ -476,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
 
                         if (focus <= 0 || health <= 0 || leisure <= 0) {
                             Toast.makeText(this, getString(R.string.error_invalid_quota), Toast.LENGTH_SHORT).show();
-                            return;
+                    
                         }
 
                         currentDayConfig.setDate(selectedDate);
@@ -484,9 +568,7 @@ public class MainActivity extends AppCompatActivity {
                         currentDayConfig.setHealthGoalMinutes(health);
                         currentDayConfig.setLeisureLimitMinutes(leisure);
 
-                        AppDatabase.databaseWriteExecutor.execute(() -> {
-                            AppDatabase.getInstance(getApplicationContext()).dayConfigDao().insertOrUpdateDayConfig(currentDayConfig);
-                        });
+                        taskViewModel.saveDayConfig(currentDayConfig);
 
                         Toast.makeText(this, getString(R.string.config_saved), Toast.LENGTH_SHORT).show();
                     } catch (NumberFormatException e) {
@@ -506,9 +588,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupSwipeActions() {
         ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) { return false; }
 
+        
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
@@ -535,8 +619,10 @@ public class MainActivity extends AppCompatActivity {
         String message = getString(R.string.task_deleted, task.getTitle());
         Snackbar snackbar = Snackbar.make(rvTasks, message, Snackbar.LENGTH_LONG)
                 .setAction(getString(R.string.undo), v -> {
-                    taskViewModel.insertTask(task);
-                    AlarmScheduler.scheduleTaskAlarm(this, task);
+                    taskViewModel.insertTask(task, newId -> {
+                        task.setId((int) newId);
+                        AlarmScheduler.scheduleTaskAlarm(MainActivity.this, task);
+                    });
                 });
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
@@ -548,6 +634,60 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
+            }
+        }
+    }
+
+
+    private void checkExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.permission_exact_alarm_title)
+                        .setMessage(R.string.permission_exact_alarm_desc)
+                        .setPositiveButton(R.string.permission_grant, (dialog, which) -> {
+                            try {
+                                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                                intent.setData(Uri.parse("package:" + getPackageName()));
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                try {
+                                    Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                                    startActivity(intent);
+                                } catch (Exception ignored) {}
+                            }
+                        })
+                        .setNegativeButton(R.string.btn_cancel, null)
+                        .show();
+            }
+        }
+    }
+
+    private void checkBatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm != null && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                boolean askedBefore = getSharedPreferences("app_preferences", MODE_PRIVATE)
+                        .getBoolean("battery_opt_prompted", false);
+                if (!askedBefore) {
+                    getSharedPreferences("app_preferences", MODE_PRIVATE).edit()
+                            .putBoolean("battery_opt_prompted", true)
+                            .apply();
+
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.permission_battery_opt_title)
+                            .setMessage(R.string.permission_battery_opt_desc)
+                            .setPositiveButton(R.string.permission_grant, (dialog, which) -> {
+                                try {
+                                    Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                                    intent.setData(Uri.parse("package:" + getPackageName()));
+                                    startActivity(intent);
+                                } catch (Exception ignored) {}
+                            })
+                            .setNegativeButton(R.string.btn_cancel, null)
+                            .show();
+                }
             }
         }
     }

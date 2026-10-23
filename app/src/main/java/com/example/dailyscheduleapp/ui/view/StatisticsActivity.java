@@ -1,6 +1,7 @@
 package com.example.dailyscheduleapp.ui.view;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -13,10 +14,17 @@ import com.example.dailyscheduleapp.data.database.AppDatabase;
 import com.example.dailyscheduleapp.data.entity.Category;
 import com.example.dailyscheduleapp.data.entity.Task;
 import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
+import com.example.dailyscheduleapp.utils.EnergyPlantHelper;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class StatisticsActivity extends AppCompatActivity {
@@ -27,9 +35,15 @@ public class StatisticsActivity extends AppCompatActivity {
     private ProgressBar progressBarCompletion;
     private ProgressBar pbPriorityHigh, pbPriorityMedium, pbPriorityLow;
     private ProgressBar pbFocusInvested, pbHealthInvested, pbLeisureInvested;
+    private TextView tvStatsEmpty;
+    private View[] statsCards;
+    private View btnStatsOpenWrap;
+    private int statsFocusMinutes = 0, statsHealthMinutes = 0, statsLeisureMinutes = 0;
+    private int statsCompleted = 0, statsTotal = 0;
 
     private final Map<Integer, Category> categoryMap = new HashMap<>();
     private List<Task> allTasksCache = new ArrayList<>();
+    private int currentFilterMode = 0; // 0: All, 1: Today, 2: This Week
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +62,13 @@ public class StatisticsActivity extends AppCompatActivity {
                     categoryMap.put(cat.getId(), cat);
                 }
             }
-            calculateStatistics(allTasksCache);
+            applyFilterAndCalculate();
         });
 
         // Lấy tất cả công việc từ Room để thống kê
         taskViewModel.getAllTasks().observe(this, tasks -> {
             allTasksCache = tasks != null ? tasks : new ArrayList<>();
-            calculateStatistics(allTasksCache);
+            applyFilterAndCalculate();
         });
     }
 
@@ -65,6 +79,14 @@ public class StatisticsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         toolbar.setNavigationOnClickListener(v -> finish());
+
+        tvStatsEmpty = findViewById(R.id.tvStatsEmpty);
+        statsCards = new View[]{
+                findViewById(R.id.cardProgress),
+                findViewById(R.id.cardTaskCount),
+                findViewById(R.id.cardPriority),
+                findViewById(R.id.cardEnergy)
+        };
 
         tvCompletionRate = findViewById(R.id.tvCompletionRate);
         tvTotalTasks = findViewById(R.id.tvTotalTasks);
@@ -87,10 +109,109 @@ public class StatisticsActivity extends AppCompatActivity {
         pbFocusInvested = findViewById(R.id.pbFocusInvested);
         pbHealthInvested = findViewById(R.id.pbHealthInvested);
         pbLeisureInvested = findViewById(R.id.pbLeisureInvested);
+        btnStatsOpenWrap = findViewById(R.id.btnStatsOpenWrap);
+        if (btnStatsOpenWrap != null) {
+            btnStatsOpenWrap.setOnClickListener(v -> {
+                String dateLabel;
+                if (currentFilterMode == 1) {
+                    dateLabel = getString(R.string.filter_today) + " (" + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()) + ")";
+                } else if (currentFilterMode == 2) {
+                    dateLabel = getString(R.string.filter_week);
+                } else {
+                    dateLabel = getString(R.string.filter_all);
+                }
+
+                EnergyPlantHelper.EnergyPlantInfo plantInfo = EnergyPlantHelper.calculatePlantInfo(
+                        statsFocusMinutes, 240,
+                        statsHealthMinutes, 30,
+                        statsLeisureMinutes, 90,
+                        statsCompleted, statsTotal
+                );
+
+                DailyWrapDialog.show(
+                        StatisticsActivity.this,
+                        dateLabel,
+                        plantInfo,
+                        statsFocusMinutes,
+                        statsHealthMinutes,
+                        statsLeisureMinutes,
+                        statsCompleted,
+                        statsTotal
+                );
+            });
+        }
+
+        MaterialButtonToggleGroup toggleGroup = findViewById(R.id.toggleGroupTimeFilter);
+        if (toggleGroup != null) {
+            toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if (!isChecked) return;
+                if (checkedId == R.id.btnFilterToday) {
+                    currentFilterMode = 1;
+                } else if (checkedId == R.id.btnFilterWeek) {
+                    currentFilterMode = 2;
+                } else {
+                    currentFilterMode = 0;
+                }
+                applyFilterAndCalculate();
+            });
+        }
+    }
+
+    private void applyFilterAndCalculate() {
+        if (allTasksCache == null || allTasksCache.isEmpty()) {
+            calculateStatistics(Collections.emptyList());
+            return;
+        }
+
+        if (currentFilterMode == 0) {
+            calculateStatistics(allTasksCache);
+            return;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Calendar now = Calendar.getInstance();
+        String todayStr = sdf.format(now.getTime());
+
+        List<Task> filtered = new ArrayList<>();
+        if (currentFilterMode == 1) { // Today
+            for (Task t : allTasksCache) {
+                if (todayStr.equals(t.getDate())) {
+                    filtered.add(t);
+                }
+            }
+        } else if (currentFilterMode == 2) { // This Week
+            Calendar weekStart = (Calendar) now.clone();
+            weekStart.set(Calendar.DAY_OF_WEEK, weekStart.getFirstDayOfWeek());
+            weekStart.set(Calendar.HOUR_OF_DAY, 0);
+            weekStart.set(Calendar.MINUTE, 0);
+            weekStart.set(Calendar.SECOND, 0);
+            weekStart.set(Calendar.MILLISECOND, 0);
+
+            Calendar weekEnd = (Calendar) weekStart.clone();
+            weekEnd.add(Calendar.DAY_OF_WEEK, 7);
+
+            for (Task t : allTasksCache) {
+                if (t.getDate() != null) {
+                    try {
+                        Date taskDate = sdf.parse(t.getDate());
+                        if (taskDate != null && !taskDate.before(weekStart.getTime()) && taskDate.before(weekEnd.getTime())) {
+                            filtered.add(t);
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+        calculateStatistics(filtered);
     }
 
     private void calculateStatistics(List<Task> tasks) {
-        if (tasks == null || tasks.isEmpty()) {
+        boolean hasTasks = tasks != null && !tasks.isEmpty();
+        tvStatsEmpty.setVisibility(hasTasks ? View.GONE : View.VISIBLE);
+        for (View card : statsCards) {
+            card.setVisibility(hasTasks ? View.VISIBLE : View.GONE);
+        }
+
+        if (!hasTasks) {
             tvTotalTasks.setText("0");
             tvCompletedTasks.setText("0");
             tvPendingTasks.setText("0");
@@ -110,6 +231,11 @@ public class StatisticsActivity extends AppCompatActivity {
             pbFocusInvested.setProgress(0);
             pbHealthInvested.setProgress(0);
             pbLeisureInvested.setProgress(0);
+            statsTotal = 0;
+            statsCompleted = 0;
+            statsFocusMinutes = 0;
+            statsHealthMinutes = 0;
+            statsLeisureMinutes = 0;
             return;
         }
 
@@ -181,6 +307,12 @@ public class StatisticsActivity extends AppCompatActivity {
 
         pbLeisureInvested.setMax(maxEnergyMinutes);
         pbLeisureInvested.setProgress(totalLeisureMinutes);
+
+        statsTotal = total;
+        statsCompleted = completed;
+        statsFocusMinutes = totalFocusMinutes;
+        statsHealthMinutes = totalHealthMinutes;
+        statsLeisureMinutes = totalLeisureMinutes;
     }
 
     private String formatMinutes(int totalMinutes) {

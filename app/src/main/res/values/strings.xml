@@ -65,6 +65,8 @@
     <string name="balance_health">Health &amp; Sport</string>
     <string name="balance_leisure">Leisure &amp; Gaming</string>
     <string name="filter_all">All</string>
+    <string name="filter_today">Today</string>
+    <string name="filter_week">This Week</string>
 
     <!-- Insights -->
     <string name="insight_perfect">🌟 Excellent! Your schedule is perfectly balanced today.</string>
@@ -87,6 +89,12 @@
     <string name="type_fixed">🔵 Fixed Schedule</string>
     <string name="category_added">Category added successfully!</string>
     <string name="error_fill_info">Please fill in title, date, and time!</string>
+    <string name="error_past_time">Cannot schedule a task in the past!</string>
+    <string name="error_voice_not_supported">Voice input is not supported on this device!</string>
+    <string name="cd_voice_input">Voice input</string>
+    <string name="cd_add_category">Add category</string>
+    <string name="cd_manage_category">Manage categories</string>
+    <string name="cd_delete_task">Delete task</string>
     <string name="category_manage_title">Manage Categories</string>
     <string name="dialog_delete_category_confirm">Are you sure you want to delete \"%1$s\"?</string>
     <string name="category_deleted">Category deleted successfully</string>
@@ -153,5 +161,88 @@
     <string name="stats_leisure_invested">Leisure &amp; Relax:</string>
     <!-- Date Navigation -->
     <string name="schedule_date_header">Schedule for %1$s</string>
-    <string name="greeting_other_day">Daily Schedule 📅</string>
+    <string name="greeting_other_day">Schedule</string>
+    <!-- Notification Settings -->
+    <string name="notification_settings_title">Settings</string>
+    <string name="notification_settings_intro">Customize reminder sound and vibration for your tasks.</string>
+
+    <string name="notification_vibration_heading">Vibration intensity</string>
+    <string name="notification_vibration_strong">Strong</string>
+    <string name="notification_vibration_normal">Normal</string>
+    <string name="notification_vibration_light">Light</string>
+    <string name="notification_vibration_off">Off</string>
+
+    <string name="notification_sound_heading">Notification sound</string>
+    <string name="notification_sound_enabled">Enable notification sound</string>
+    <string name="notification_sound_default_summary">Using the default sound</string>
+    <string name="notification_sound_picker_title">Choose notification sound</string>
+    <string name="notification_sound_selected_summary">Selected sound: %1$s</string>
+    <string name="notification_choose_sound">Choose sound</string>
+    <string name="notification_use_system_default_sound">Use default sound</string>
+
+    <string name="notification_system_settings_note">Android system settings may override sound and vibration behavior for notification channels.</string>
+    <string name="notification_settings_saved">Notification settings saved</string>
+    <string name="notification_save">Save settings</string>
+    <string name="notification_open_system_settings">Open system notification settings</string>
+    <string name="stats_empty_state">No tasks to analyze yet.\nAdd a task to see your progress.</string>
+    <string name="appearance_section">App theme</string>
+    <string name="appearance_light">Light</string>
+    <string name="appearance_dark">Dark</string>
+    <string name="pomodoro_service_channel_name">Pomodoro Focus Timer</string>
+    <string name="pomodoro_service_channel_desc">Ongoing countdown notification for active Pomodoro sessions</string>
+    <string name="pomodoro_notif_stop">Stop</string>
+    <!-- Exact Alarm & Background Permissions -->
+    <string name="permission_exact_alarm_title">Exact Alarm Permission Required</string>
+    <string name="permission_exact_alarm_desc">To ensure reminders ring accurately on time when your screen is off or the app is closed, please allow "Alarms &amp; reminders" for Daily Schedule.</string>
+    <string name="permission_grant">Allow</string>
+    <string name="permission_battery_opt_title">Unrestricted Background Activity</string>
+    <string name="permission_battery_opt_desc">To prevent your device (Nubia, Xiaomi, etc.) from canceling alarms when clearing recent apps, please allow unrestricted background activity for this app.</string>
+    <string name="task_saved_success">Task saved successfully</string>
+    <string name="dialog_permission_both_title">Enable Notifications &amp; Alarms</string>
+    <string name="dialog_permission_both_desc">Task saved. However, to ring and wake the screen on time when locked, please enable \"Notifications\" and \"Alarms &amp; reminders\" in Settings.</string>
+    <string name="dialog_permission_notification_title">Enable Notification Permission</string>
+    <string name="dialog_permission_notification_desc">Task saved. Please turn on \"Notifications\" so the app can display alarms and reminders on time.</string>
+    <string name="dialog_permission_exact_alarm_title">Enable Alarms &amp; Reminders</string>
+    <string name="dialog_permission_exact_alarm_desc">Task saved. Please turn on \"Alarms &amp; reminders\" so alarms ring accurately even when the screen is locked or the app is closed.</string>
+    <string name="btn_open_toggle_now">Open switch now</string>
+    <string name="btn_later">Later</string>
+
+    <!-- Energy Plant Gamification -->
+    <string name="plant_title_header">Energy Plant</string>
+    <string name="plant_seedling_title">Sprouting Seedling</string>
+    <string name="plant_seedling_desc">Add tasks and workouts to nurture your seedling today!</string>
+    <string name="plant_blooming_title">Blooming Harmony Tree</string>
+    <string name="plant_blooming_desc">Great! You are maintaining a perfect balance between focus, health, and leisure!</string>
+    <string name="plant_growing_title">Healthy Growing Tree</string>
+    <string name="plant_growing_desc">The tree is growing well! Keep up the good work and steady balance!</string>
+    <string name="plant_thirsty_title">Thirsty Plant</string>
+    <string name="plant_thirsty_desc">The plant needs water! Spend at least 20-30 minutes on physical workout.</string>
+    <string name="plant_wilting_title">Wilting from Overload</string>
+    <string name="plant_wilting_desc">You are working beyond your limit! Put tasks on hold and take a rest.</string>
+    <string name="plant_overgrown_title">Overgrown with Weeds</string>
+    <string name="plant_overgrown_desc">Leisure time has exceeded your limit. Clear the weeds and refocus!</string>
+
+    <!-- Daily Energy Wrap Card -->
+    <string name="daily_wrap_title">Today\'s Energy Card</string>
+    <string name="daily_wrap_btn">✨ Wrap Card</string>
+    <string name="daily_wrap_view_card">View Wrap Card</string>
+    <string name="daily_wrap_subtitle">Daily rhythm &amp; energy balance wrap</string>
+    <string name="daily_wrap_watermark">DAILY SCHEDULE • LIVE BALANCED EVERY DAY</string>
+    <string name="daily_wrap_focus_label">Focus</string>
+    <string name="daily_wrap_health_label">Health</string>
+    <string name="daily_wrap_leisure_label">Leisure</string>
+    <string name="daily_wrap_tasks_label">Completed</string>
+    <string name="daily_wrap_score_label">Balance Score</string>
+    <string name="daily_wrap_btn_save">Save Image</string>
+    <string name="daily_wrap_btn_share">Share Story</string>
+    <string name="daily_wrap_save_success">Card image saved to Gallery!</string>
+    <string name="daily_wrap_save_failed">Could not save card image!</string>
+    <string name="daily_wrap_share_subject">Today\'s Energy Balance Card</string>
+
+    <string name="rank_master">🌟 MASTER OF BALANCE</string>
+    <string name="rank_focus_warrior">🔥 PRODUCTIVITY WARRIOR</string>
+    <string name="rank_health_champion">💪 HEALTH CHAMPION</string>
+    <string name="rank_beginner">🌱 SPROUT OF HOPE</string>
+    <string name="rank_need_rest">🛋️ RECHARGE NEEDED</string>
+    <string name="rank_refocus">🎯 REFOCUS NEEDED</string>
 </resources>

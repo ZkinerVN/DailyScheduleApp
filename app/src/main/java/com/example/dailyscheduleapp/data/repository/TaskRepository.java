@@ -30,8 +30,21 @@ public class TaskRepository {
         return taskDao.getTasksByDate(date);
     }
 
+    public interface OnTaskInsertedListener {
+        void onTaskInserted(long newId);
+    }
+
     public void insertTask(Task task) {
-        AppDatabase.databaseWriteExecutor.execute(() -> taskDao.insert(task));
+        insertTask(task, null);
+    }
+
+    public void insertTask(Task task, OnTaskInsertedListener callback) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            long newId = taskDao.insert(task);
+            if (callback != null) {
+                callback.onTaskInserted(newId);
+            }
+        });
     }
 
     public void updateTask(Task task) {
@@ -40,5 +53,13 @@ public class TaskRepository {
 
     public void deleteTask(Task task) {
         AppDatabase.databaseWriteExecutor.execute(() -> taskDao.delete(task));
+    }
+
+    public void insertCategory(Category category) {
+        AppDatabase.databaseWriteExecutor.execute(() -> categoryDao.insert(category));
+    }
+
+    public void deleteCategory(Category category) {
+        AppDatabase.databaseWriteExecutor.execute(() -> categoryDao.delete(category));
     }
 }

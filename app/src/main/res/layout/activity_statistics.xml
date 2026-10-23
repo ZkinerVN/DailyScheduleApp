@@ -3,14 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F7F9"
+    android:background="@color/app_background"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarStats"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/white"
+        android:background="@color/surface"
         app:elevation="1dp"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="@string/stats_title"
@@ -29,26 +29,88 @@
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp">
 
-            <!-- 1. THẺ TỔNG QUAN TIẾN ĐỘ -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- BỘ LỌC THỜI GIAN -->
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleGroupTimeFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:checkedButton="@+id/btnFilterAll">
+
+                <Button
+                    android:id="@+id/btnFilterAll"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/filter_all" />
+
+                <Button
+                    android:id="@+id/btnFilterToday"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/filter_today" />
+
+                <Button
+                    android:id="@+id/btnFilterWeek"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/filter_week" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <!-- Nút mở Thẻ Năng Lượng / Cây Năng Lượng trong Thống kê -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStatsOpenWrap"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="12dp"
+                android:text="@string/daily_wrap_view_card"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp"
+                app:cornerRadius="12dp"
+                app:strokeColor="?attr/colorPrimary"
+                app:icon="@android:drawable/ic_menu_today"
+                app:iconTint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvStatsEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="40dp"
+                android:gravity="center"
+                android:text="@string/stats_empty_state"
+                android:textColor="@color/text_secondary"
+                android:textSize="18sp"
+                android:visibility="gone" />
+
+            <!-- 1. THẺ TỔNG QUAN TIẾN ĐỘ -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/stats_progress_title"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -68,6 +130,7 @@
                         style="?android:attr/progressBarStyleHorizontal"
                         android:layout_width="match_parent"
                         android:layout_height="10dp"
+                        android:progressBackgroundTint="#E5E7EB"
                         android:max="100"
                         android:progress="0"
                         android:progressTint="?attr/colorPrimary" />
@@ -76,27 +139,28 @@
 
             <!-- 2. THẺ CHI TIẾT SỐ LƯỢNG (3 Cột) -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTaskCount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/stats_task_count_title"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -116,7 +180,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textColor="@android:color/black"
+                                android:textColor="@color/text_primary"
                                 android:textSize="22sp"
                                 android:textStyle="bold" />
 
@@ -125,7 +189,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:text="@string/stats_total_tasks"
-                                android:textColor="#757575"
+                                android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                         </LinearLayout>
 
@@ -186,95 +250,97 @@
 
             <!-- 3. THẺ PHÂN BỔ MỨC ƯU TIÊN -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardPriority"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/stats_priority_distribution"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <!-- Ưu tiên Cao -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/priority_high" android:textColor="#D32F2F" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:id="@+id/tvPriorityHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#D32F2F" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvPriorityHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#D32F2F" android:textSize="13sp" android:textStyle="bold"  />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbPriorityHigh" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#D32F2F" />
+                    <ProgressBar android:id="@+id/pbPriorityHigh" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#D32F2F" />
 
                     <!-- Ưu tiên Trung bình -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/priority_medium" android:textColor="#EF6C00" android:textSize="13sp" android:textStyle="bold" />
                         <TextView android:id="@+id/tvPriorityMedium" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#EF6C00" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbPriorityMedium" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#EF6C00" />
+                    <ProgressBar android:id="@+id/pbPriorityMedium" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#EF6C00" />
 
                     <!-- Ưu tiên Thấp -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/priority_low" android:textColor="#2E7D32" android:textSize="13sp" android:textStyle="bold" />
                         <TextView android:id="@+id/tvPriorityLow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="#2E7D32" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbPriorityLow" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:progressTint="#2E7D32" />
+                    <ProgressBar android:id="@+id/pbPriorityLow" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:progressTint="#2E7D32" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- 4. THẺ PHÂN BỔ THỜI GIAN THEO NĂNG LƯỢNG -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardEnergy"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="12dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/stats_energy_title"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <!-- Thời gian Focus -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/stats_focus_invested" android:textColor="#D32F2F" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:id="@+id/tvFocusInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvFocusInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textColor="@color/text_primary" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbFocusInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#D32F2F" />
+                    <ProgressBar android:id="@+id/pbFocusInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#D32F2F" />
 
                     <!-- Thời gian Health -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/stats_health_invested" android:textColor="#388E3C" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:id="@+id/tvHealthInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvHealthInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textColor="@color/text_primary" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbHealthInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#388E3C" />
+                    <ProgressBar android:id="@+id/pbHealthInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:layout_marginBottom="10dp" android:progressTint="#388E3C" />
 
                     <!-- Thời gian Leisure -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/stats_leisure_invested" android:textColor="#F57C00" android:textSize="13sp" android:textStyle="bold" />
-                        <TextView android:id="@+id/tvLeisureInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tvLeisureInvested" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0m" android:textColor="@color/text_primary" android:textSize="13sp" android:textStyle="bold" />
                     </LinearLayout>
-                    <ProgressBar android:id="@+id/pbLeisureInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="4dp" android:progressTint="#F57C00" />
+                    <ProgressBar android:id="@+id/pbLeisureInvested" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:layout_marginTop="4dp" android:progressTint="#F57C00" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

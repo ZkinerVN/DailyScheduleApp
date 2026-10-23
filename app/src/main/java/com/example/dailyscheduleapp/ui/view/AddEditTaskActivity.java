@@ -1,12 +1,19 @@
 package com.example.dailyscheduleapp.ui.view;
 
+import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,15 +26,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.dailyscheduleapp.R;
-import com.example.dailyscheduleapp.data.dao.CategoryDao;
-import com.example.dailyscheduleapp.data.database.AppDatabase;
 import com.example.dailyscheduleapp.data.entity.Category;
 import com.example.dailyscheduleapp.data.entity.Task;
 import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
@@ -42,7 +45,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private EditText edtTitle, edtDescription, edtDuration;
     private SwitchCompat switchIncludeInBalance;
     private Button btnSelectDate, btnSelectTime, btnSave;
-    private ImageButton btnMicro, btnAddCategory;
+    private ImageButton btnAddCategory;
     private TextView tvDateTimeSelected;
     private RadioGroup rgPriority;
     private Spinner spinnerCategory;
@@ -57,21 +60,8 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private final List<String> categoryNames = new ArrayList<>();
     private ArrayAdapter<String> categoryAdapter;
     private int selectedCategoryId = 1;
-
-    // Bộ lắng nghe kết quả trả về từ giọng nói
-    private final ActivityResultLauncher<Intent> voiceLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    ArrayList<String> text = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    if (text != null && !text.isEmpty()) {
-                        String spokenText = text.get(0);
-                        spokenText = spokenText.substring(0, 1).toUpperCase() + spokenText.substring(1);
-                        edtTitle.setText(spokenText);
-                    }
-                }
-            }
-    );
+    private boolean existingIsCompleted = false;
+    private int existingActualDuration = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +76,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         btnSelectDate = findViewById(R.id.btnSelectDate);
         btnSelectTime = findViewById(R.id.btnSelectTime);
         btnSave = findViewById(R.id.btnSave);
-        btnMicro = findViewById(R.id.btnMicro);
         tvDateTimeSelected = findViewById(R.id.tvDateTimeSelected);
         rgPriority = findViewById(R.id.rgPriority);
         spinnerCategory = findViewById(R.id.spinnerCategory);
@@ -104,19 +93,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         btnSelectDate.setOnClickListener(v -> showDatePicker());
         btnSelectTime.setOnClickListener(v -> showTimePicker());
         btnAddCategory.setOnClickListener(v -> showAddCategoryDialog());
-
-        btnMicro.setOnClickListener(v -> {
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.task_title_hint));
-
-            try {
-                voiceLauncher.launch(intent);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(this, "Voice input not supported", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         btnSave.setOnClickListener(v -> saveTask());
         ImageButton btnManageCategory = findViewById(R.id.btnManageCategory);
@@ -158,7 +134,18 @@ public class AddEditTaskActivity extends AppCompatActivity {
             }
 
             selectedCategoryId = intent.getIntExtra("EXTRA_CATEGORY_ID", 1);
+            existingIsCompleted = intent.getBooleanExtra("EXTRA_IS_COMPLETED", false);
+            existingActualDuration = intent.getIntExtra("EXTRA_ACTUAL_DURATION", 0);
             btnSave.setText(getString(R.string.btn_save_task));
+        } else if (intent != null && intent.hasExtra("EXTRA_DATE")) {
+            String passedDate = intent.getStringExtra("EXTRA_DATE");
+            String today = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new java.util.Date());
+            if (passedDate != null && passedDate.compareTo(today) >= 0) {
+                selectedDate = passedDate;
+            } else {
+                selectedDate = today;
+            }
+            updateDateTimeText();
         }
     }
 
@@ -166,7 +153,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNames);
         spinnerCategory.setAdapter(categoryAdapter);
 
-        AppDatabase.getInstance(this).categoryDao().getAllCategories().observe(this, categories -> {
+        taskViewModel.getAllCategories().observe(this, categories -> {
             categoryList.clear();
             categoryNames.clear();
 
@@ -185,7 +172,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
                 categoryAdapter.notifyDataSetChanged();
                 spinnerCategory.setSelection(defaultSelectionIndex);
             } else {
-                categoryNames.add("No Category");
+                categoryNames.add(getString(R.string.cat_uncategorized));
                 categoryAdapter.notifyDataSetChanged();
             }
         });
@@ -256,9 +243,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
                 }
 
                 Category newCategory = new Category(categoryName, assignedColor, selectedType);
-                AppDatabase.databaseWriteExecutor.execute(() -> {
-                    AppDatabase.getInstance(getApplicationContext()).categoryDao().insert(newCategory);
-                });
+                taskViewModel.insertCategory(newCategory);
                 Toast.makeText(this, getString(R.string.category_added), Toast.LENGTH_SHORT).show();
             }
         });
@@ -269,10 +254,18 @@ public class AddEditTaskActivity extends AppCompatActivity {
 
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
-        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
             selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
             updateDateTimeText();
-        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+
+        Calendar todayStart = Calendar.getInstance();
+        todayStart.set(Calendar.HOUR_OF_DAY, 0);
+        todayStart.set(Calendar.MINUTE, 0);
+        todayStart.set(Calendar.SECOND, 0);
+        todayStart.set(Calendar.MILLISECOND, 0);
+        datePickerDialog.getDatePicker().setMinDate(todayStart.getTimeInMillis());
+        datePickerDialog.show();
     }
 
     private void showTimePicker() {
@@ -313,10 +306,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_delete_category_confirm, category.getLocalizedName(this)))
                 .setPositiveButton(getString(R.string.dialog_apply), (dialog, which) -> {
-                    AppDatabase.databaseWriteExecutor.execute(() -> {
-                        CategoryDao catDao = AppDatabase.getInstance(getApplicationContext()).categoryDao();
-                        catDao.delete(category);
-                    });
+                    taskViewModel.deleteCategory(category);
                     Toast.makeText(this, getString(R.string.category_deleted), Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(getString(R.string.btn_cancel), (dialog, which) -> dialog.dismiss())
@@ -330,6 +320,16 @@ public class AddEditTaskActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.error_fill_info), Toast.LENGTH_SHORT).show();
             return;
         }
+
+        // Kiểm tra không cho tạo lịch trong quá khứ
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+            java.util.Date scheduled = sdf.parse(selectedDate + " " + selectedTime);
+            if (scheduled != null && scheduled.getTime() < System.currentTimeMillis() - 60000) {
+                Toast.makeText(this, getString(R.string.error_past_time), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (Exception ignored) {}
 
         // 2. ĐÃ SỬA: Lấy đúng thời lượng do người dùng nhập
         int duration = 60;
@@ -362,14 +362,120 @@ public class AddEditTaskActivity extends AppCompatActivity {
         taskToSave.setCategoryId(selectedCategoryId);
         taskToSave.setEstimatedDuration(duration);
         taskToSave.setIncludeInBalance(includeInBalance);
+        taskToSave.setCompleted(existingIsCompleted);
+        taskToSave.setActualDuration(existingActualDuration);
 
+        Context appContext = getApplicationContext();
         if (currentTaskId == -1) {
-            taskViewModel.insertTask(taskToSave);
+            taskViewModel.insertTask(taskToSave, newId -> {
+                taskToSave.setId((int) newId);
+                AlarmScheduler.scheduleTaskAlarm(appContext, taskToSave);
+            });
         } else {
             taskViewModel.updateTask(taskToSave);
+            if (!taskToSave.isCompleted()) {
+                AlarmScheduler.scheduleTaskAlarm(this, taskToSave);
+            } else {
+                AlarmScheduler.cancelTaskAlarm(this, taskToSave);
+            }
         }
-        AlarmScheduler.scheduleTaskAlarm(this, taskToSave);
 
-        finish();
+        // Kiểm tra quyền "Thông báo" và "Báo thức & lời nhắc"
+        boolean hasNotification = isNotificationPermissionGranted();
+        boolean hasExactAlarm = isExactAlarmPermissionGranted();
+
+        if (hasNotification && hasExactAlarm) {
+            Toast.makeText(this, getString(R.string.task_saved_success), Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Hướng dẫn người dùng mở công tắc ngay nếu chưa bật
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
+
+        if (!hasNotification && !hasExactAlarm) {
+            builder.setTitle(R.string.dialog_permission_both_title)
+                    .setMessage(R.string.dialog_permission_both_desc)
+                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
+                        openAppDetailsSettings();
+                        finish();
+                    })
+                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
+                    .show();
+        } else if (!hasNotification) {
+            builder.setTitle(R.string.dialog_permission_notification_title)
+                    .setMessage(R.string.dialog_permission_notification_desc)
+                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
+                        openNotificationSettings();
+                        finish();
+                    })
+                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
+                    .show();
+        } else {
+            builder.setTitle(R.string.dialog_permission_exact_alarm_title)
+                    .setMessage(R.string.dialog_permission_exact_alarm_desc)
+                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
+                        openExactAlarmSettings();
+                        finish();
+                    })
+                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
+                    .show();
+        }
+    }
+
+    private boolean isNotificationPermissionGranted() {
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
+            return false;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    private boolean isExactAlarmPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            return alarmManager != null && alarmManager.canScheduleExactAlarms();
+        }
+        return true;
+    }
+
+    private void openNotificationSettings() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                startActivity(intent);
+            } else {
+                openAppDetailsSettings();
+            }
+        } catch (Exception e) {
+            openAppDetailsSettings();
+        }
+    }
+
+    private void openExactAlarmSettings() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            } else {
+                openAppDetailsSettings();
+            }
+        } catch (Exception e) {
+            openAppDetailsSettings();
+        }
+    }
+
+    private void openAppDetailsSettings() {
+        try {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception ignored) {}
     }
 }

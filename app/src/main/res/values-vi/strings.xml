@@ -65,6 +65,8 @@
     <string name="balance_health">Sức khỏe (Vận động)</string>
     <string name="balance_leisure">Giải trí (Game/Thư giãn)</string>
     <string name="filter_all">Tất cả</string>
+    <string name="filter_today">Hôm nay</string>
+    <string name="filter_week">Tuần này</string>
 
     <!-- Insights -->
     <string name="insight_perfect">🌟 Tuyệt vời! Lịch trình hôm nay của bạn rất cân bằng.</string>
@@ -87,6 +89,12 @@
     <string name="type_fixed">🔵 Lịch cố định</string>
     <string name="category_added">Đã thêm danh mục mới!</string>
     <string name="error_fill_info">Vui lòng nhập tên công việc, chọn ngày và giờ!</string>
+    <string name="error_past_time">Không thể tạo lịch cho thời gian trong quá khứ!</string>
+    <string name="error_voice_not_supported">Thiết bị không hỗ trợ nhận diện giọng nói!</string>
+    <string name="cd_voice_input">Nhập bằng giọng nói</string>
+    <string name="cd_add_category">Thêm danh mục</string>
+    <string name="cd_manage_category">Quản lý danh mục</string>
+    <string name="cd_delete_task">Xóa công việc</string>
     <string name="category_manage_title">Quản lý danh mục</string>
     <string name="dialog_delete_category_confirm">Bạn có chắc chắn muốn xóa danh mục \"%1$s\" không?</string>
     <string name="category_deleted">Đã xóa danh mục thành công</string>
@@ -153,5 +161,89 @@
     <string name="stats_leisure_invested">Giải trí (Thư giãn):</string>
     <!-- Date Navigation -->
     <string name="schedule_date_header">Lịch trình ngày %1$s</string>
-    <string name="greeting_other_day">Kế hoạch ngày 📅</string>
+    <string name="greeting_other_day">Lịch trình</string>
+
+    <!-- Cài đặt thông báo -->
+    <string name="notification_settings_title">Cài đặt</string>
+    <string name="notification_settings_intro">Tùy chỉnh âm thanh và độ rung khi đến giờ làm việc.</string>
+
+    <string name="notification_vibration_heading">Cường độ rung</string>
+    <string name="notification_vibration_strong">Mạnh</string>
+    <string name="notification_vibration_normal">Bình thường</string>
+    <string name="notification_vibration_light">Nhẹ</string>
+    <string name="notification_vibration_off">Tắt rung</string>
+
+    <string name="notification_sound_heading">Âm thanh thông báo</string>
+    <string name="notification_sound_enabled">Bật âm thanh thông báo</string>
+    <string name="notification_sound_default_summary">Đang sử dụng âm thanh mặc định</string>
+    <string name="notification_sound_picker_title">Chọn âm thanh thông báo</string>
+    <string name="notification_sound_selected_summary">Âm thanh đã chọn: %1$s</string>
+    <string name="notification_choose_sound">Chọn âm thanh</string>
+    <string name="notification_use_system_default_sound">Sử dụng âm thanh mặc định</string>
+
+    <string name="notification_system_settings_note">Cài đặt hệ thống Android có thể ghi đè cách hoạt động của âm thanh và độ rung trên từng kênh thông báo.</string>
+    <string name="notification_settings_saved">Đã lưu cài đặt thông báo</string>
+    <string name="notification_save">Lưu cài đặt</string>
+    <string name="notification_open_system_settings">Mở cài đặt thông báo hệ thống</string>
+    <string name="stats_empty_state">Chưa có công việc để thống kê.\nHãy thêm công việc để xem tiến độ của bạn.</string>
+    <string name="appearance_section">Giao diện ứng dụng</string>
+    <string name="appearance_light">Sáng</string>
+    <string name="appearance_dark">Tối</string>
+    <string name="pomodoro_service_channel_name">Đồng hồ Pomodoro</string>
+    <string name="pomodoro_service_channel_desc">Thông báo đếm ngược thời gian thực cho phiên Pomodoro</string>
+    <string name="pomodoro_notif_stop">Dừng</string>
+    <!-- Quyền Báo thức chính xác & Chạy nền -->
+    <string name="permission_exact_alarm_title">Yêu cầu quyền Báo thức chính xác</string>
+    <string name="permission_exact_alarm_desc">Để chuông báo thức kêu đúng giờ khi tắt màn hình hoặc đóng app, vui lòng cấp quyền \"Báo thức &amp; lời nhắc\" cho Daily Schedule.</string>
+    <string name="permission_grant">Cho phép</string>
+    <string name="permission_battery_opt_title">Cho phép chạy ngầm không giới hạn</string>
+    <string name="permission_battery_opt_desc">Để máy (Nubia, Xiaomi, v.v.) không hủy lịch báo thức khi bạn gạt xóa app đa nhiệm, vui lòng cấp quyền chạy ngầm không bị tối ưu pin.</string>
+    <string name="task_saved_success">Đã lưu công việc thành công</string>
+    <string name="dialog_permission_both_title">Cần bật Thông báo &amp; Báo thức</string>
+    <string name="dialog_permission_both_desc">Công việc đã được lưu. Tuy nhiên để chuông kêu và hiển thị màn hình báo thức đúng giờ khi khóa máy, vui lòng bật \"Thông báo\" và \"Báo thức &amp; lời nhắc\" trong Cài đặt.</string>
+    <string name="dialog_permission_notification_title">Cần bật quyền Thông báo</string>
+    <string name="dialog_permission_notification_desc">Công việc đã được lưu. Vui lòng bật công tắc \"Thông báo\" để ứng dụng hiển thị chuông báo và lời nhắc khi đến giờ hẹn.</string>
+    <string name="dialog_permission_exact_alarm_title">Cần bật Báo thức &amp; lời nhắc</string>
+    <string name="dialog_permission_exact_alarm_desc">Công việc đã được lưu. Vui lòng bật công tắc \"Báo thức &amp; lời nhắc\" để chuông báo thức kêu chính xác ngay cả khi khóa máy hoặc tắt app.</string>
+    <string name="btn_open_toggle_now">Mở công tắc ngay</string>
+    <string name="btn_later">Để sau</string>
+
+    <!-- Cây Năng Lượng (Energy Plant Gamification) -->
+    <string name="plant_title_header">Cây Năng Lượng</string>
+    <string name="plant_seedling_title">Mầm non khởi đầu</string>
+    <string name="plant_seedling_desc">Hãy bắt đầu thêm việc và rèn luyện để nuôi dưỡng mầm cây hôm nay nhé!</string>
+    <string name="plant_blooming_title">Cây nở hoa rực rỡ</string>
+    <string name="plant_blooming_desc">Tuyệt vời! Bạn đang duy trì sự cân bằng hoàn hảo giữa học tập, sức khỏe và giải trí!</string>
+    <string name="plant_growing_title">Cây phát triển xanh tốt</string>
+    <string name="plant_growing_desc">Cây đang lớn rất đều! Tiếp tục phát huy nhịp độ này nhé!</string>
+    <string name="plant_thirsty_title">Cây đang khát nước</string>
+    <string name="plant_thirsty_desc">Cây đang thiếu nước! Hãy dành ít nhất 20-30 phút vận động thể chất nhé.</string>
+    <string name="plant_wilting_title">Cây khô héo vì quá tải</string>
+    <string name="plant_wilting_desc">Bạn đang làm việc quá sức! Hãy tạm gác việc lại và nghỉ ngơi nào.</string>
+    <string name="plant_overgrown_title">Cây bị mọc cỏ dại</string>
+    <string name="plant_overgrown_desc">Thời gian giải trí đã vượt hạn mức. Hãy tỉa bớt cỏ dại và quay lại mục tiêu chính!</string>
+
+    <!-- Thẻ Tổng Kết Ngày (Daily Energy Wrap Card) -->
+    <string name="daily_wrap_title">Thẻ Năng Lượng Hôm Nay</string>
+    <string name="daily_wrap_btn">✨ Thẻ Ngày</string>
+    <string name="daily_wrap_view_card">Xem Thẻ Tổng Kết</string>
+    <string name="daily_wrap_subtitle">Tổng kết nhịp sống &amp; cân bằng năng lượng</string>
+    <string name="daily_wrap_watermark">DAILY SCHEDULE • SỐNG CÂN BẰNG MỖI NGÀY</string>
+    <string name="daily_wrap_focus_label">Tập trung</string>
+    <string name="daily_wrap_health_label">Vận động</string>
+    <string name="daily_wrap_leisure_label">Giải trí</string>
+    <string name="daily_wrap_tasks_label">Hoàn thành</string>
+    <string name="daily_wrap_score_label">Điểm cân bằng</string>
+    <string name="daily_wrap_btn_save">Lưu ảnh thẻ</string>
+    <string name="daily_wrap_btn_share">Chia sẻ Story</string>
+    <string name="daily_wrap_save_success">Đã lưu ảnh thẻ vào bộ sưu tập!</string>
+    <string name="daily_wrap_save_failed">Không thể lưu ảnh thẻ!</string>
+    <string name="daily_wrap_share_subject">Thẻ Cân Bằng Năng Lượng Hôm Nay</string>
+
+    <string name="rank_master">🌟 BẬC THẦY CÂN BẰNG</string>
+    <string name="rank_focus_warrior">🔥 CHIẾN BINH NĂNG SUẤT</string>
+    <string name="rank_health_champion">💪 CHIẾN TƯỚNG SỨC KHỎE</string>
+    <string name="rank_beginner">🌱 MẦM NON HY VỌNG</string>
+    <string name="rank_need_rest">🛋️ CẦN NẠP LẠI PIN</string>
+    <string name="rank_refocus">🎯 CẦN TÁI TẬP TRUNG</string>
 </resources>

@@ -4,14 +4,16 @@
     android:id="@+id/layoutRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA"
+    android:background="@color/app_background"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarPomodoro"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/white"
+        android:background="@color/surface"
+        app:navigationIconTint="@color/text_primary"
+        app:titleTextColor="@color/text_primary"
         app:elevation="1dp"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:title="@string/pomodoro_title"
@@ -32,46 +34,46 @@
             android:paddingVertical="16dp">
 
             <!-- Thẻ gắn kết Task đang tập trung -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardFocusTask"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#E0E0E0"
-                app:strokeWidth="1dp">
+            <!--            <com.google.android.material.card.MaterialCardView-->
+            <!--                android:id="@+id/cardFocusTask"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginBottom="24dp"-->
+            <!--                app:cardCornerRadius="14dp"-->
+            <!--                app:cardElevation="0dp"-->
+            <!--                app:strokeColor="#E0E0E0"-->
+            <!--                app:strokeWidth="1dp">-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="12dp">
+            <!--&lt;!&ndash;                <LinearLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;                    android:gravity="center_vertical"&ndash;&gt;-->
+            <!--&lt;!&ndash;                    android:orientation="horizontal"&ndash;&gt;-->
+            <!--&lt;!&ndash;                    android:padding="12dp">&ndash;&gt;-->
 
-                    <TextView
-                        android:id="@+id/tvFocusTaskTitle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/pomodoro_general_focus"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+            <!--&lt;!&ndash;                    <TextView&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:id="@+id/tvFocusTaskTitle"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:layout_width="0dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:layout_weight="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:ellipsize="end"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:maxLines="1"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:text="@string/pomodoro_general_focus"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:textColor="@android:color/black"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:textSize="14sp"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:textStyle="bold" />&ndash;&gt;-->
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCompleteTaskFromPomodoro"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:paddingHorizontal="10dp"
-                        android:text="@string/pomodoro_btn_complete_task"
-                        android:textSize="12sp"
-                        android:visibility="gone" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            <!--&lt;!&ndash;                    <com.google.android.material.button.MaterialButton&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:id="@+id/btnCompleteTaskFromPomodoro"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        style="?attr/materialButtonOutlinedStyle"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:layout_width="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:layout_height="36dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:paddingHorizontal="10dp"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:text="@string/pomodoro_btn_complete_task"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:textSize="12sp"&ndash;&gt;-->
+            <!--&lt;!&ndash;                        android:visibility="gone" />&ndash;&gt;-->
+            <!--&lt;!&ndash;                </LinearLayout>&ndash;&gt;-->
+            <!--            </com.google.android.material.card.MaterialCardView>-->
 
             <!-- Vòng tròn tiến trình Pomodoro -->
             <FrameLayout
@@ -113,7 +115,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="4dp"
                         android:text="25:00"
-                        android:textColor="@android:color/black"
+                        android:textColor="@color/text_primary"
                         android:textSize="54sp"
                         android:textStyle="bold" />
 
@@ -121,14 +123,15 @@
                         android:id="@+id/tvCycleCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hiệp 1 / 4"
-                        android:textColor="#757575"
+                        android:text="1 / 4"
+                        android:textColor="@color/text_secondary"
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Cụm nút điều khiển chính: Đặt lại - Bắt đầu/Tạm dừng - Bỏ qua -->
+
+            <!-- Cụm nút điều khiển chính -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -139,33 +142,53 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReset"
                     style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:singleLine="true"
                     android:text="@string/btn_reset"
-                    android:textSize="14sp"
+                    android:textColor="@color/brand_primary"
+                    android:textSize="12sp"
+                    app:strokeColor="@color/outline"
                     app:cornerRadius="26dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStartPause"
-                    android:layout_width="140dp"
+                    android:layout_width="0dp"
                     android:layout_height="52dp"
-                    android:layout_marginHorizontal="12dp"
-                    android:backgroundTint="#FF5722"
+                    android:layout_weight="1.4"
+                    android:layout_marginHorizontal="4dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:singleLine="true"
+                    android:backgroundTint="@color/brand_primary"
                     android:text="@string/pomodoro_btn_start"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
+                    android:textColor="@color/on_brand"
+                    android:textSize="13sp"
                     android:textStyle="bold"
                     app:cornerRadius="26dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSkip"
                     style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="4dp"
+                    android:singleLine="true"
                     android:text="@string/pomodoro_btn_skip"
-                    android:textSize="14sp"
+                    android:textColor="@color/brand_primary"
+                    android:textSize="12sp"
+                    app:strokeColor="@color/outline"
                     app:cornerRadius="26dp" />
+
             </LinearLayout>
+
 
             <!-- Cài đặt thời lượng Tập trung -->
             <TextView
@@ -173,7 +196,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="@string/focus_label"
-                android:textColor="#616161"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -191,7 +214,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="15m" />
+                    android:text="15m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnWork25"
@@ -201,7 +227,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="25m" />
+                    android:text="25m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnWork45"
@@ -211,7 +240,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="45m" />
+                    android:text="45m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnWorkCustom"
@@ -222,7 +254,10 @@
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
                     android:text="@string/btn_custom"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
             </LinearLayout>
 
             <!-- Cài đặt thời lượng Nghỉ ngơi -->
@@ -231,7 +266,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="@string/break_label"
-                android:textColor="#616161"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -249,7 +284,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="5m" />
+                    android:text="5m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBreak10"
@@ -259,7 +297,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="10m" />
+                    android:text="10m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBreak15"
@@ -269,7 +310,10 @@
                     android:layout_marginHorizontal="2dp"
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
-                    android:text="15m" />
+                    android:text="15m"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnBreakCustom"
@@ -280,7 +324,10 @@
                     android:layout_weight="1"
                     android:paddingHorizontal="0dp"
                     android:text="@string/btn_custom"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="@color/brand_primary"
+                    app:strokeColor="@color/outline"
+                    app:cornerRadius="20dp" />
             </LinearLayout>
 
         </LinearLayout>

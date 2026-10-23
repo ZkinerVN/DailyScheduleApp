@@ -12,7 +12,7 @@ import java.util.List;
 @Dao
 public interface TaskDao {
     @Insert
-    void insert(Task task);
+    long insert(Task task);
 
     @Update
     void update(Task task);
@@ -41,4 +41,7 @@ public interface TaskDao {
     void markTaskAsCompleted(int taskId);
     @Query("SELECT * FROM tasks WHERE isCompleted = 0")
     List<Task> getIncompleteTasksSync();
+
+    @Query("UPDATE tasks SET actualDuration = actualDuration + :durationMinutes WHERE id = :taskId")
+    void addActualDuration(int taskId, int durationMinutes);
 }
