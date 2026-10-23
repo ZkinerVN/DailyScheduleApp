@@ -235,4 +235,4 @@ Chạy toàn bộ unit test qua dòng lệnh:
 ## 📄 Bản quyền & Tác giả (License & Credits)
 
 - Dự án được phát triển nhằm mục đích học tập, nghiên cứu và quản lý năng suất cá nhân.
-- Giấy phép phân phối: [MIT License](LICENSE).
+- Giấy phép phân phối: [MIT License](LICENSE)
