@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
     private final Map<Integer, Category> categoryMap = new HashMap<>();
     private OnTaskClickListener listener;
 
-    private static final DiffUtil.ItemCallback<Task> DIFF_CALLBACK = new DiffUtil.ItemCallback<Task>() {
+    private static final DiffUtil.ItemCallback<Task> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
         @Override
         public boolean areItemsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
             return oldItem.getId() == newItem.getId();
@@ -122,19 +123,19 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
                 priorityStripColor = Color.parseColor("#FF1744"); // Vibrant Red
                 holder.tvPriority.setText(context.getString(R.string.priority_high));
                 holder.tvPriority.setTextColor(Color.parseColor("#E11D48"));
-                holder.tvPriority.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_priority_high));
+                holder.tvPriority.setBackground(createBadgeDrawable(context, "#FFE4E6"));
                 break;
             case 2:
                 priorityStripColor = Color.parseColor("#FF9100"); // Vibrant Orange
                 holder.tvPriority.setText(context.getString(R.string.priority_medium));
                 holder.tvPriority.setTextColor(Color.parseColor("#D97706"));
-                holder.tvPriority.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_priority_medium));
+                holder.tvPriority.setBackground(createBadgeDrawable(context, "#FEF3C7"));
                 break;
             default:
                 priorityStripColor = Color.parseColor("#00C853"); // Vibrant Emerald Green
                 holder.tvPriority.setText(context.getString(R.string.priority_low));
                 holder.tvPriority.setTextColor(Color.parseColor("#059669"));
-                holder.tvPriority.setBackground(ContextCompat.getDrawable(context, R.drawable.bg_priority_low));
+                holder.tvPriority.setBackground(createBadgeDrawable(context, "#ECFDF5"));
                 break;
         }
 
@@ -269,7 +270,16 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
         return (task.getDate() + " " + task.getTime()).compareTo(currentDateTime) < 0;
     }
 
-    static class TaskViewHolder extends RecyclerView.ViewHolder {
+    private GradientDrawable createBadgeDrawable(Context context, String colorHex) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setColor(Color.parseColor(colorHex));
+        float density = context.getResources().getDisplayMetrics().density;
+        drawable.setCornerRadius(8f * density);
+        return drawable;
+    }
+
+    public static class TaskViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardTask;
         View viewPriorityStrip;
         CheckBox cbCompleted;
