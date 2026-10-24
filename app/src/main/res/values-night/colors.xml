@@ -1,11 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="app_background">#121212</color>
-    <color name="surface">#1E1E1E</color>
-    <color name="text_primary">#F4F4F5</color>
-    <color name="text_secondary">#D4D4D8</color>
-    <color name="text_hint">#A1A1AA</color>
-    <color name="outline">#858591</color>
-    <color name="brand_primary">#5B3FA6</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Material You Vibrant Palette (Dark Mode) -->
+    <color name="brand_primary">#A855F7</color>
+    <color name="primary">#A855F7</color>
+    <color name="brand_primary_variant">#9333EA</color>
+    <color name="brand_secondary">#F472B6</color>
+    <color name="secondary">#F472B6</color>
     <color name="on_brand">#FFFFFF</color>
+
+    <color name="app_background">#100A1F</color>
+    <color name="surface">#1B122F</color>
+    <color name="surface_variant">#2A1D46</color>
+
+    <color name="text_primary">#FAF7FD</color>
+    <color name="text_secondary">#C8BDDE</color>
+    <color name="text_hint">#8A7D9F</color>
+    <color name="outline">#3D2D5E</color>
+
+    <!-- Energy Metrics Colors -->
+    <color name="accent_focus">#FB7185</color>
+    <color name="accent_focus_light">#4C0519</color>
+    <color name="accent_health">#34D399</color>
+    <color name="accent_health_light">#064E3B</color>
+    <color name="accent_leisure">#FBBF24</color>
+    <color name="accent_leisure_light">#451A03</color>
 </resources>

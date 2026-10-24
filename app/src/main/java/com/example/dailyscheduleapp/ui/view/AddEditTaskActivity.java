@@ -1,19 +1,21 @@
 package com.example.dailyscheduleapp.ui.view;
 
+import android.annotation.SuppressLint;
+
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.provider.Settings;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,6 +30,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.dailyscheduleapp.R;
@@ -35,7 +39,9 @@ import com.example.dailyscheduleapp.data.entity.Category;
 import com.example.dailyscheduleapp.data.entity.Task;
 import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
 import com.example.dailyscheduleapp.utils.AlarmScheduler;
+import com.google.android.material.card.MaterialCardView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -49,6 +55,9 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private TextView tvDateTimeSelected;
     private RadioGroup rgPriority;
     private Spinner spinnerCategory;
+    private Spinner spinnerRepeat;
+    private MaterialCardView cardConflictWarning;
+    private TextView tvConflictWarning;
 
     private TaskViewModel taskViewModel;
     private String selectedDate = "";
@@ -62,6 +71,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private int selectedCategoryId = 1;
     private boolean existingIsCompleted = false;
     private int existingActualDuration = 0;
+    private int initialRepeatType = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +89,14 @@ public class AddEditTaskActivity extends AppCompatActivity {
         tvDateTimeSelected = findViewById(R.id.tvDateTimeSelected);
         rgPriority = findViewById(R.id.rgPriority);
         spinnerCategory = findViewById(R.id.spinnerCategory);
+        spinnerRepeat = findViewById(R.id.spinnerRepeat);
         btnAddCategory = findViewById(R.id.btnAddCategory);
+        cardConflictWarning = findViewById(R.id.cardConflictWarning);
+        tvConflictWarning = findViewById(R.id.tvConflictWarning);
 
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+
+        setupRepeatSpinner();
 
         // Kiểm tra xem Activity mở lên để THÊM MỚI hay SỬA CÔNG VIỆC
         checkIntentData();
@@ -103,6 +118,25 @@ public class AddEditTaskActivity extends AppCompatActivity {
         if (btnCancel != null) {
             btnCancel.setOnClickListener(v -> finish());
         }
+
+        edtDuration.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int count, int after) {
+                checkTimeConflict();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void setupRepeatSpinner() {
+        String[] repeatOptions = new String[] {
+                getString(R.string.repeat_none),
+                getString(R.string.repeat_daily),
+                getString(R.string.repeat_weekdays),
+                getString(R.string.repeat_weekly)
+        };
+        ArrayAdapter<String> repeatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, repeatOptions);
+        spinnerRepeat.setAdapter(repeatAdapter);
     }
 
     // Nhận dữ liệu cũ nếu là chế độ Sửa
@@ -136,10 +170,15 @@ public class AddEditTaskActivity extends AppCompatActivity {
             selectedCategoryId = intent.getIntExtra("EXTRA_CATEGORY_ID", 1);
             existingIsCompleted = intent.getBooleanExtra("EXTRA_IS_COMPLETED", false);
             existingActualDuration = intent.getIntExtra("EXTRA_ACTUAL_DURATION", 0);
+            initialRepeatType = intent.getIntExtra("EXTRA_REPEAT_TYPE", 0);
+            if (initialRepeatType >= 0 && initialRepeatType < spinnerRepeat.getCount()) {
+                spinnerRepeat.setSelection(initialRepeatType);
+            }
             btnSave.setText(getString(R.string.btn_save_task));
+            checkTimeConflict();
         } else if (intent != null && intent.hasExtra("EXTRA_DATE")) {
             String passedDate = intent.getStringExtra("EXTRA_DATE");
-            String today = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new java.util.Date());
+            String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new java.util.Date());
             if (passedDate != null && passedDate.compareTo(today) >= 0) {
                 selectedDate = passedDate;
             } else {
@@ -161,27 +200,36 @@ public class AddEditTaskActivity extends AppCompatActivity {
                 categoryList.addAll(categories);
                 int defaultSelectionIndex = 0;
 
-                for (int i = 0; i < categories.size(); i++) {
-                    Category cat = categories.get(i);
-                    categoryNames.add(cat.getLocalizedName(AddEditTaskActivity.this));
+                for (int i = 0; i < categoryList.size(); i++) {
+                    Category cat = categoryList.get(i);
+                    String displayName = cat.getLocalizedName(this);
+                    if ("SYS_FIXED".equals(cat.getName()) || cat.getType() == 5) {
+                        displayName = "📌 " + displayName;
+                    }
+                    categoryNames.add(displayName);
 
                     if (cat.getId() == selectedCategoryId) {
                         defaultSelectionIndex = i;
                     }
                 }
+
                 categoryAdapter.notifyDataSetChanged();
                 spinnerCategory.setSelection(defaultSelectionIndex);
-            } else {
-                categoryNames.add(getString(R.string.cat_uncategorized));
-                categoryAdapter.notifyDataSetChanged();
             }
         });
 
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!categoryList.isEmpty() && position < categoryList.size()) {
-                    selectedCategoryId = categoryList.get(position).getId();
+                if (position >= 0 && position < categoryList.size()) {
+                    Category cat = categoryList.get(position);
+                    selectedCategoryId = cat.getId();
+
+                    // Nếu chọn "Lịch cố định", tự động tắt tính vào Daily Balance và gợi ý lặp lại
+                    if ("SYS_FIXED".equals(cat.getName()) || cat.getType() == 5) {
+                        switchIncludeInBalance.setChecked(false);
+                    }
+                    checkTimeConflict();
                 }
             }
 
@@ -194,31 +242,28 @@ public class AddEditTaskActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.dialog_add_category_title));
 
-        // Tạo layout dạng động cho Dialog
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(48, 24, 48, 12);
+        layout.setPadding(48, 24, 48, 24);
 
-        // 1. Ô nhập tên danh mục
         final EditText inputName = new EditText(this);
         inputName.setHint(getString(R.string.dialog_category_name_hint));
+        inputName.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
         layout.addView(inputName);
 
-        // 2. Nhãn chọn loại năng lượng
-        TextView tvTypeLabel = new TextView(this);
-        tvTypeLabel.setText(getString(R.string.dialog_category_type_label));
-        tvTypeLabel.setTextSize(14f);
-        tvTypeLabel.setPadding(0, 24, 0, 8);
-        layout.addView(tvTypeLabel);
+        final TextView tvTypePrompt = new TextView(this);
+        tvTypePrompt.setText(getString(R.string.dialog_category_type_label));
+        tvTypePrompt.setPadding(0, 24, 0, 8);
+        tvTypePrompt.setTextSize(13);
+        layout.addView(tvTypePrompt);
 
-        // 3. Spinner chọn loại năng lượng
         final Spinner spinnerType = new Spinner(this);
-        String[] types = new String[]{
-                getString(R.string.type_focus),    // Vị trí 0 -> Type 1
-                getString(R.string.type_health),   // Vị trí 1 -> Type 2
-                getString(R.string.type_leisure),  // Vị trí 2 -> Type 3
-                getString(R.string.type_personal), // Vị trí 3 -> Type 4
-                getString(R.string.type_fixed)     // Vị trí 4 -> Type 5
+        String[] types = new String[] {
+                getString(R.string.type_focus),
+                getString(R.string.type_health),
+                getString(R.string.type_leisure),
+                getString(R.string.type_personal),
+                getString(R.string.type_fixed)
         };
         ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, types);
         spinnerType.setAdapter(typeAdapter);
@@ -226,20 +271,17 @@ public class AddEditTaskActivity extends AppCompatActivity {
 
         builder.setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_apply), (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.btn_save_task), (dialog, which) -> {
             String categoryName = inputName.getText().toString().trim();
             if (!categoryName.isEmpty()) {
-                // Vị trí chọn + 1 tương ứng với: 1=FOCUS, 2=HEALTH, 3=LEISURE, 4=PERSONAL, 5=FIXED
                 int selectedType = spinnerType.getSelectedItemPosition() + 1;
-
-                // Gán màu nhận diện tự động theo loại năng lượng
                 String assignedColor;
                 switch (selectedType) {
-                    case 1: assignedColor = "#2196F3"; break; // Focus: Xanh dương
-                    case 2: assignedColor = "#4CAF50"; break; // Health: Xanh lá
-                    case 3: assignedColor = "#FF9800"; break; // Leisure: Cam
-                    case 5: assignedColor = "#F44336"; break; // Fixed: Đỏ
-                    default: assignedColor = "#9E9E9E"; break; // Personal: Xám
+                    case 1: assignedColor = "#2196F3"; break;
+                    case 2: assignedColor = "#4CAF50"; break;
+                    case 3: assignedColor = "#FF9800"; break;
+                    case 5: assignedColor = "#F44336"; break;
+                    default: assignedColor = "#9E9E9E"; break;
                 }
 
                 Category newCategory = new Category(categoryName, assignedColor, selectedType);
@@ -257,6 +299,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
             selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
             updateDateTimeText();
+            checkTimeConflict();
         }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
         Calendar todayStart = Calendar.getInstance();
@@ -273,22 +316,62 @@ public class AddEditTaskActivity extends AppCompatActivity {
         new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
             updateDateTimeText();
+            checkTimeConflict();
         }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateDateTimeText() {
         if (!selectedTime.isEmpty() && !selectedDate.isEmpty()) {
-            tvDateTimeSelected.setText(getString(R.string.datetime_selected) + selectedTime + " " + selectedDate);
+            tvDateTimeSelected.setText(getString(R.string.datetime_selected) + selectedTime + " • " + selectedDate);
         } else {
             tvDateTimeSelected.setText(getString(R.string.datetime_not_selected));
         }
     }
+
+    private void checkTimeConflict() {
+        if (selectedDate.isEmpty() || selectedTime.isEmpty()) {
+            if (cardConflictWarning != null) cardConflictWarning.setVisibility(View.GONE);
+            return;
+        }
+
+        int duration = 60;
+        try {
+            String durStr = edtDuration.getText().toString().trim();
+            if (!durStr.isEmpty()) duration = Integer.parseInt(durStr);
+        } catch (Exception ignored) {}
+
+        taskViewModel.checkTimeConflictWithFixedSchedule(selectedDate, selectedTime, duration, currentTaskId, conflict -> {
+            runOnUiThread(() -> {
+                if (conflict != null && cardConflictWarning != null && tvConflictWarning != null) {
+                    cardConflictWarning.setVisibility(View.VISIBLE);
+                    String start = conflict.getTime() != null ? conflict.getTime() : "--:--";
+                    String end = calculateEndTime(start, conflict.getEstimatedDuration());
+                    tvConflictWarning.setText(getString(R.string.conflict_warning_format, conflict.getTitle(), start, end));
+                } else if (cardConflictWarning != null) {
+                    cardConflictWarning.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
+
+    private String calculateEndTime(String startTime, int durationMinutes) {
+        try {
+            String[] parts = startTime.split(":");
+            int min = Integer.parseInt(parts[0].trim()) * 60 + Integer.parseInt(parts[1].trim()) + durationMinutes;
+            int h = (min / 60) % 24;
+            int m = min % 60;
+            return String.format(Locale.getDefault(), "%02d:%02d", h, m);
+        } catch (Exception e) {
+            return startTime;
+        }
+    }
+
     private void showManageCategoriesDialog() {
         if (categoryList.isEmpty()) return;
 
         List<String> displayItems = new ArrayList<>();
         for (Category cat : categoryList) {
-            // Cho phép xóa mọi danh mục
             displayItems.add("🗑 " + cat.getLocalizedName(this));
         }
 
@@ -312,26 +395,21 @@ public class AddEditTaskActivity extends AppCompatActivity {
                 .setNegativeButton(getString(R.string.btn_cancel), (dialog, which) -> dialog.dismiss())
                 .show();
     }
+
     private void saveTask() {
         String title = edtTitle.getText().toString().trim();
         String description = edtDescription.getText().toString().trim();
 
-        if (title.isEmpty() || selectedDate.isEmpty() || selectedTime.isEmpty()) {
-            Toast.makeText(this, getString(R.string.error_fill_info), Toast.LENGTH_SHORT).show();
+        if (title.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_title_empty), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Kiểm tra không cho tạo lịch trong quá khứ
-        try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-            java.util.Date scheduled = sdf.parse(selectedDate + " " + selectedTime);
-            if (scheduled != null && scheduled.getTime() < System.currentTimeMillis() - 60000) {
-                Toast.makeText(this, getString(R.string.error_past_time), Toast.LENGTH_SHORT).show();
-                return;
-            }
-        } catch (Exception ignored) {}
+        if (selectedDate.isEmpty() || selectedTime.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_select_datetime), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // 2. ĐÃ SỬA: Lấy đúng thời lượng do người dùng nhập
         int duration = 60;
         String durStr = edtDuration.getText().toString().trim();
         if (!durStr.isEmpty()) {
@@ -342,13 +420,14 @@ public class AddEditTaskActivity extends AppCompatActivity {
             }
         }
 
-        // ĐÃ SỬA: Lấy đúng trạng thái công tắc Daily Balance
         boolean includeInBalance = switchIncludeInBalance.isChecked();
 
         int priority = 1;
         int checkedId = rgPriority.getCheckedRadioButtonId();
         if (checkedId == R.id.rbMedium) priority = 2;
         else if (checkedId == R.id.rbHigh) priority = 3;
+
+        int repeatType = spinnerRepeat != null ? spinnerRepeat.getSelectedItemPosition() : 0;
 
         Task taskToSave = new Task();
         if (currentTaskId != -1) {
@@ -364,6 +443,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         taskToSave.setIncludeInBalance(includeInBalance);
         taskToSave.setCompleted(existingIsCompleted);
         taskToSave.setActualDuration(existingActualDuration);
+        taskToSave.setRepeatType(repeatType);
 
         Context appContext = getApplicationContext();
         if (currentTaskId == -1) {
@@ -398,41 +478,39 @@ public class AddEditTaskActivity extends AppCompatActivity {
             builder.setTitle(R.string.dialog_permission_both_title)
                     .setMessage(R.string.dialog_permission_both_desc)
                     .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
-                        openAppDetailsSettings();
+                        openNotificationSettings();
+                        openExactAlarmSettings();
                         finish();
-                    })
-                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
-                    .show();
+                    });
         } else if (!hasNotification) {
             builder.setTitle(R.string.dialog_permission_notification_title)
                     .setMessage(R.string.dialog_permission_notification_desc)
                     .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
                         openNotificationSettings();
                         finish();
-                    })
-                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
-                    .show();
+                    });
         } else {
             builder.setTitle(R.string.dialog_permission_exact_alarm_title)
                     .setMessage(R.string.dialog_permission_exact_alarm_desc)
                     .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
                         openExactAlarmSettings();
                         finish();
-                    })
-                    .setNegativeButton(R.string.btn_later, (dialog, which) -> finish())
-                    .show();
+                    });
         }
+
+        builder.setNegativeButton(R.string.btn_later, (dialog, which) -> {
+            dialog.dismiss();
+            finish();
+        });
+
+        builder.show();
     }
 
     private boolean isNotificationPermissionGranted() {
-        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) {
-            return false;
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    == PackageManager.PERMISSION_GRANTED;
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
         }
-        return true;
+        return NotificationManagerCompat.from(this).areNotificationsEnabled();
     }
 
     private boolean isExactAlarmPermissionGranted() {
@@ -444,38 +522,24 @@ public class AddEditTaskActivity extends AppCompatActivity {
     }
 
     private void openNotificationSettings() {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                startActivity(intent);
-            } else {
-                openAppDetailsSettings();
-            }
-        } catch (Exception e) {
-            openAppDetailsSettings();
+        Intent intent = new Intent();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+        } else {
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
         }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     private void openExactAlarmSettings() {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            } else {
-                openAppDetailsSettings();
-            }
-        } catch (Exception e) {
-            openAppDetailsSettings();
-        }
-    }
-
-    private void openAppDetailsSettings() {
-        try {
-            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
             intent.setData(Uri.parse("package:" + getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-        } catch (Exception ignored) {}
+        }
     }
 }

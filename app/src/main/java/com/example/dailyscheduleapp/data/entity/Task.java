@@ -13,7 +13,7 @@ public class Task {
     private String date; // Định dạng yyyy-MM-dd
     private String time; // Định dạng HH:mm
 
-    // THUỘC TÍNH MỚI: Quản lý thời gian & Cân bằng năng lượng
+    // QUẢN LÝ THỜI GIAN & CÂN BẰNG NĂNG LƯỢNG
     private int estimatedDuration; // Thời lượng dự kiến (phút)
     private int actualDuration;    // Thời lượng thực tế sau khi làm xong (phút)
     private boolean includeInBalance; // Có tính vào Daily Balance không? (Mặc định: true)
@@ -21,9 +21,15 @@ public class Task {
     private int priority; // 1: Thấp, 2: Trung bình, 3: Cao
     private int categoryId;
 
-    // THUỘC TÍNH MỚI: Trạng thái thông minh
+    // TRẠNG THÁI THÔNG MINH
     private boolean isCompleted;
     private boolean isOverdue; // Bật cờ này nếu quá hạn chưa làm
+
+    // LẶP LẠI (RECURRING / HABIT)
+    // 0: Không lặp, 1: Hàng ngày, 2: Thứ 2 - Thứ 6, 3: Hàng tuần
+    private int repeatType;
+    // ID của task gốc định nghĩa mẫu lặp (0 nếu là task độc lập/mẫu gốc)
+    private int parentTaskId;
 
     // Constructor mặc định
     public Task() {
@@ -32,6 +38,8 @@ public class Task {
         this.includeInBalance = true;
         this.isOverdue = false;
         this.isCompleted = false;
+        this.repeatType = 0;
+        this.parentTaskId = 0;
     }
 
     // --- GETTER & SETTER ---
@@ -70,4 +78,10 @@ public class Task {
 
     public boolean isOverdue() { return isOverdue; }
     public void setOverdue(boolean overdue) { isOverdue = overdue; }
+
+    public int getRepeatType() { return repeatType; }
+    public void setRepeatType(int repeatType) { this.repeatType = repeatType; }
+
+    public int getParentTaskId() { return parentTaskId; }
+    public void setParentTaskId(int parentTaskId) { this.parentTaskId = parentTaskId; }
 }

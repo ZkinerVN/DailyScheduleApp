@@ -10,19 +10,27 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.example.dailyscheduleapp.R;
+import com.example.dailyscheduleapp.data.database.AppDatabase;
+import com.example.dailyscheduleapp.data.entity.Task;
+import com.example.dailyscheduleapp.utils.AmbientSoundManager;
 import com.example.dailyscheduleapp.service.PomodoroService;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class PomodoroActivity extends AppCompatActivity implements PomodoroService.PomodoroListener {
@@ -44,6 +52,11 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
     private TextView tvMode, tvTimer, tvCycleCount;
     private MaterialButton btnStartPause, btnReset, btnSkip;
     private CircularProgressIndicator circularProgress;
+    private MaterialCardView cardFocusTask;
+    private TextView tvFocusTaskTitle;
+    private ImageButton btnClearTask;
+    private AmbientSoundManager ambientSoundManager;
+    private MaterialButton btnAmbientOff, btnAmbientRain, btnAmbientWind, btnAmbientWaves;
 
     private PomodoroService pomodoroService;
     private boolean isBound = false;
@@ -76,6 +89,8 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         initViews();
         resolveIncomingTaskIntent();
         setupPresetButtons();
+        setupBoundTaskCard();
+        setupAmbientSoundButtons();
 
         btnStartPause.setOnClickListener(v -> {
             ensureServiceStarted();
@@ -103,6 +118,92 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         updateUiThemeAndText();
     }
 
+    private void initViews() {
+        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbarPomodoro);
+        if (toolbar != null) {
+            toolbar.setNavigationOnClickListener(v -> finish());
+        }
+
+        tvMode = findViewById(R.id.tvMode);
+        tvTimer = findViewById(R.id.tvTimer);
+        tvCycleCount = findViewById(R.id.tvCycleCount);
+        btnStartPause = findViewById(R.id.btnStartPause);
+        btnReset = findViewById(R.id.btnReset);
+        btnSkip = findViewById(R.id.btnSkip);
+        circularProgress = findViewById(R.id.circularTimerProgress);
+        cardFocusTask = findViewById(R.id.cardFocusTask);
+        tvFocusTaskTitle = findViewById(R.id.tvFocusTaskTitle);
+        btnClearTask = findViewById(R.id.btnClearTask);
+    }
+
+    private void setupBoundTaskCard() {
+        updateBoundTaskUi();
+
+        if (cardFocusTask != null) {
+            cardFocusTask.setOnClickListener(v -> {
+                if (boundTaskId == -1) {
+                    showPickTaskDialog();
+                }
+            });
+        }
+
+        if (btnClearTask != null) {
+            btnClearTask.setOnClickListener(v -> {
+                boundTaskId = -1;
+                boundTaskTitle = "";
+                if (pomodoroService != null) {
+                    pomodoroService.setBoundTask(-1, "");
+                }
+                updateBoundTaskUi();
+            });
+        }
+    }
+
+    private void updateBoundTaskUi() {
+        if (tvFocusTaskTitle == null) return;
+        if (boundTaskId != -1 && !boundTaskTitle.isEmpty()) {
+            tvFocusTaskTitle.setText(getString(R.string.pomodoro_focusing_on, boundTaskTitle));
+            tvFocusTaskTitle.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
+            if (btnClearTask != null) btnClearTask.setVisibility(View.VISIBLE);
+        } else {
+            tvFocusTaskTitle.setText(R.string.pomodoro_general_focus);
+            tvFocusTaskTitle.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+            if (btnClearTask != null) btnClearTask.setVisibility(View.GONE);
+        }
+    }
+
+    private void showPickTaskDialog() {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Task> pendingTasks = AppDatabase.getInstance(this).taskDao().getIncompleteTasksSync();
+            runOnUiThread(() -> {
+                if (pendingTasks == null || pendingTasks.isEmpty()) {
+                    Toast.makeText(this, getString(R.string.empty_state), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String[] taskNames = new String[pendingTasks.size()];
+                for (int i = 0; i < pendingTasks.size(); i++) {
+                    Task t = pendingTasks.get(i);
+                    taskNames[i] = t.getTitle() + (t.getTime() != null ? " (" + t.getTime() + ")" : "");
+                }
+
+                new AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.pomodoro_choose_task))
+                        .setItems(taskNames, (dialog, which) -> {
+                            Task chosen = pendingTasks.get(which);
+                            boundTaskId = chosen.getId();
+                            boundTaskTitle = chosen.getTitle();
+                            if (pomodoroService != null) {
+                                pomodoroService.setBoundTask(boundTaskId, boundTaskTitle);
+                            }
+                            updateBoundTaskUi();
+                        })
+                        .setNegativeButton(getString(R.string.btn_cancel), (dialog, which) -> dialog.dismiss())
+                        .show();
+            });
+        });
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -119,6 +220,14 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
             }
             unbindService(serviceConnection);
             isBound = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (ambientSoundManager != null) {
+            ambientSoundManager.stop();
         }
     }
 
@@ -139,35 +248,14 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         this.isWorkMode = pomodoroService.isWorkMode();
         this.isLongBreakMode = pomodoroService.isLongBreakMode();
         this.currentCycle = pomodoroService.getCurrentCycle();
-        this.workTimeMillis = pomodoroService.getWorkTimeMillis();
-        this.breakTimeMillis = pomodoroService.getBreakTimeMillis();
         updateUiThemeAndText();
     }
 
-    private void initViews() {
-        Toolbar toolbar = findViewById(R.id.toolbarPomodoro);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> finish());
-
-        tvMode = findViewById(R.id.tvMode);
-        tvTimer = findViewById(R.id.tvTimer);
-        tvCycleCount = findViewById(R.id.tvCycleCount);
-        circularProgress = findViewById(R.id.circularTimerProgress);
-
-        btnStartPause = findViewById(R.id.btnStartPause);
-        btnReset = findViewById(R.id.btnReset);
-        btnSkip = findViewById(R.id.btnSkip);
-    }
-
     private void resolveIncomingTaskIntent() {
-        boundTaskId = getIntent().getIntExtra("TASK_ID", -1);
-        boundTaskTitle = getIntent().getStringExtra("TASK_TITLE");
-        com.google.android.material.appbar.MaterialToolbar toolbar = findViewById(R.id.toolbarPomodoro);
-        if (toolbar != null && boundTaskTitle != null && !boundTaskTitle.isEmpty()) {
-            toolbar.setSubtitle("🎯 " + boundTaskTitle);
+        if (getIntent().hasExtra("TASK_ID")) {
+            boundTaskId = getIntent().getIntExtra("TASK_ID", -1);
+            boundTaskTitle = getIntent().getStringExtra("TASK_TITLE");
+            updateBoundTaskUi();
         }
     }
 
@@ -181,48 +269,82 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         findViewById(R.id.btnBreak10).setOnClickListener(v -> setDuration(10, false));
         findViewById(R.id.btnBreak15).setOnClickListener(v -> setDuration(15, false));
         findViewById(R.id.btnBreakCustom).setOnClickListener(v -> showCustomDurationDialog(false));
+    }
 
-        updatePresetSelection();
+    private void setupAmbientSoundButtons() {
+        ambientSoundManager = new AmbientSoundManager();
+
+        btnAmbientOff = findViewById(R.id.btnAmbientOff);
+        btnAmbientRain = findViewById(R.id.btnAmbientRain);
+        btnAmbientWind = findViewById(R.id.btnAmbientWind);
+        btnAmbientWaves = findViewById(R.id.btnAmbientWaves);
+
+        if (btnAmbientOff != null) btnAmbientOff.setOnClickListener(v -> selectAmbientSound(AmbientSoundManager.SOUND_OFF));
+        if (btnAmbientRain != null) btnAmbientRain.setOnClickListener(v -> selectAmbientSound(AmbientSoundManager.SOUND_RAIN));
+        if (btnAmbientWind != null) btnAmbientWind.setOnClickListener(v -> selectAmbientSound(AmbientSoundManager.SOUND_WIND));
+        if (btnAmbientWaves != null) btnAmbientWaves.setOnClickListener(v -> selectAmbientSound(AmbientSoundManager.SOUND_WAVES));
+
+        updateAmbientButtonsUi();
+    }
+
+    private void selectAmbientSound(int type) {
+        if (ambientSoundManager != null) {
+            ambientSoundManager.setSoundType(type);
+            if (isTimerRunning && isWorkMode && type != AmbientSoundManager.SOUND_OFF) {
+                ambientSoundManager.start();
+            }
+        }
+        updateAmbientButtonsUi();
+    }
+
+    private void updateAmbientButtonsUi() {
+        int activeType = ambientSoundManager != null ? ambientSoundManager.getCurrentSoundType() : AmbientSoundManager.SOUND_OFF;
+        int activeColor = ContextCompat.getColor(this, R.color.brand_primary);
+        int onActiveColor = ContextCompat.getColor(this, R.color.on_brand);
+        int inactiveTextColor = ContextCompat.getColor(this, R.color.text_primary);
+
+        highlightButton(btnAmbientOff, activeType == AmbientSoundManager.SOUND_OFF, activeColor, onActiveColor, inactiveTextColor);
+        highlightButton(btnAmbientRain, activeType == AmbientSoundManager.SOUND_RAIN, activeColor, onActiveColor, inactiveTextColor);
+        highlightButton(btnAmbientWind, activeType == AmbientSoundManager.SOUND_WIND, activeColor, onActiveColor, inactiveTextColor);
+        highlightButton(btnAmbientWaves, activeType == AmbientSoundManager.SOUND_WAVES, activeColor, onActiveColor, inactiveTextColor);
+    }
+
+    private void highlightButton(MaterialButton btn, boolean isSelected, int activeColor, int onActiveColor, int inactiveTextColor) {
+        if (btn == null) return;
+        if (isSelected) {
+            btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(activeColor));
+            btn.setTextColor(onActiveColor);
+            btn.setStrokeWidth(0);
+        } else {
+            btn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT));
+            btn.setTextColor(inactiveTextColor);
+            btn.setStrokeWidth(2);
+        }
     }
 
     private void setDuration(int minutes, boolean forWork) {
-        if (pomodoroService != null && pomodoroService.isTimerRunning()) {
-            Toast.makeText(this, getString(R.string.pomodoro_toast_reset_first), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        long millis = minutes * 60 * 1000L;
         if (forWork) {
-            workTimeMillis = (long) minutes * 60 * 1000L;
+            workTimeMillis = millis;
         } else {
-            breakTimeMillis = (long) minutes * 60 * 1000L;
+            breakTimeMillis = millis;
         }
 
         if (pomodoroService != null) {
             pomodoroService.setDurations(workTimeMillis, breakTimeMillis, longBreakTimeMillis);
         } else {
-            if (forWork) {
-                if (isWorkMode) {
-                    totalDurationMillis = workTimeMillis;
-                    timeLeftInMillis = workTimeMillis;
-                }
-            } else {
-                if (!isWorkMode && !isLongBreakMode) {
-                    totalDurationMillis = breakTimeMillis;
-                    timeLeftInMillis = breakTimeMillis;
-                }
+            if (forWork && isWorkMode) {
+                timeLeftInMillis = millis;
+                totalDurationMillis = millis;
+            } else if (!forWork && !isWorkMode) {
+                timeLeftInMillis = millis;
+                totalDurationMillis = millis;
             }
-            updateUiThemeAndText();
         }
-
-        Toast.makeText(this, getString(R.string.pomodoro_duration_toast, minutes), Toast.LENGTH_SHORT).show();
+        updateUiThemeAndText();
     }
 
     private void showCustomDurationDialog(boolean forWork) {
-        if (pomodoroService != null && pomodoroService.isTimerRunning()) {
-            Toast.makeText(this, getString(R.string.pomodoro_toast_reset_first), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.pomodoro_dialog_custom_title));
 
@@ -260,15 +382,32 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         this.isLongBreakMode = isLongBreakMode;
         this.currentCycle = currentCycle;
         updateUiThemeAndText();
+
+        if (isRunning && isWorkMode) {
+            if (ambientSoundManager != null && ambientSoundManager.getCurrentSoundType() != AmbientSoundManager.SOUND_OFF) {
+                ambientSoundManager.start();
+            }
+        } else {
+            if (ambientSoundManager != null) {
+                ambientSoundManager.stop();
+            }
+        }
     }
 
     @Override
     public void onSessionCompleted(boolean wasWorkMode) {
-        // Notification, vibration and sound are handled by PomodoroService
+        runOnUiThread(() -> {
+            if (wasWorkMode && boundTaskId != -1 && !boundTaskTitle.isEmpty()) {
+                int mins = (int) (workTimeMillis / (60 * 1000L));
+                Toast.makeText(this, getString(R.string.pomodoro_session_credited, mins, boundTaskTitle), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void updateUiThemeAndText() {
-        int themeColor = isWorkMode ? Color.parseColor("#FF5722") : Color.parseColor("#388E3C");
+        int themeColor = isWorkMode
+                ? ContextCompat.getColor(this, R.color.brand_primary)
+                : ContextCompat.getColor(this, R.color.accent_health);
 
         int modeText = isWorkMode
                 ? R.string.pomodoro_focus_mode
@@ -279,8 +418,8 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
         tvMode.setTextColor(themeColor);
 
         btnStartPause.setText(isTimerRunning ? getString(R.string.pomodoro_btn_pause) : getString(R.string.pomodoro_btn_start));
-        btnStartPause.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.brand_primary)));
-        btnStartPause.setTextColor(getColor(R.color.on_brand));
+        btnStartPause.setBackgroundTintList(ColorStateList.valueOf(themeColor));
+        btnStartPause.setTextColor(ContextCompat.getColor(this, R.color.on_brand));
         circularProgress.setIndicatorColor(themeColor);
 
         tvCycleCount.setText(getString(R.string.pomodoro_cycle_format, currentCycle));
@@ -309,11 +448,12 @@ public class PomodoroActivity extends AppCompatActivity implements PomodoroServi
 
     private void setPresetSelected(int buttonId, boolean selected) {
         MaterialButton button = findViewById(buttonId);
-        int backgroundColor = selected ? getColor(R.color.brand_primary) : Color.TRANSPARENT;
-        int textColor = selected ? getColor(R.color.on_brand) : getColor(R.color.brand_primary);
+        if (button == null) return;
+        int backgroundColor = selected ? ContextCompat.getColor(this, R.color.brand_primary) : Color.TRANSPARENT;
+        int textColor = selected ? ContextCompat.getColor(this, R.color.on_brand) : ContextCompat.getColor(this, R.color.brand_primary);
         button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         button.setTextColor(textColor);
-        button.setStrokeColor(ColorStateList.valueOf(getColor(R.color.outline)));
+        button.setStrokeColor(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.outline)));
     }
 
     private void updateCountDownText() {

@@ -11,176 +11,183 @@
         android:orientation="vertical"
         android:layout_marginBottom="56dp">
 
-        <!-- 1. Header Lời chào, Ngày tháng & Nút Ngôn ngữ & Cài đặt thông báo -->
+        <!-- 1. Cụm Header: Lời chào & Nút tiện ích -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="4dp"
             android:gravity="center_vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tvGreeting"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvGreeting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <!-- Cụm điều hướng ngày: [<] [Thứ, Ngày/Tháng 📅] [>] -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageButton
-                        android:id="@+id/btnPrevDay"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_media_previous"
-                        android:contentDescription="Previous Day"
-                        app:tint="@color/text_secondary" />
-
-                    <TextView
-                        android:id="@+id/tvCurrentDateFull"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="4dp"
-                        android:background="?attr/selectableItemBackground"
-                        android:paddingHorizontal="4dp"
-                        android:paddingVertical="2dp"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <ImageButton
-                        android:id="@+id/btnNextDay"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_media_next"
-                        android:contentDescription="Next Day"
-                        app:tint="@color/text_secondary" />
-                </LinearLayout>
-            </LinearLayout>
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end" />
 
             <Button
                 android:id="@+id/btnSwitchLanguage"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="0dp"
                 android:text="@string/lang_current"
                 android:textColor="?attr/colorPrimary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
 
             <ImageButton
                 android:id="@+id/btnNotificationSettings"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="4dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="6dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/notification_settings_title"
                 android:src="@drawable/ic_settings"
                 app:tint="?attr/colorPrimary" />
         </LinearLayout>
 
-        <!-- 2. Thẻ Today's Balance (Đã tích hợp Cây Năng Lượng & Thẻ Ngày) -->
+        <!-- 2. Cụm Điều hướng ngày: [<] [Thứ, Ngày/Tháng 📅] [>] (Hàng riêng biệt, không bị co ép) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:paddingBottom="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnPrevDay"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="Previous Day"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvCurrentDateFull"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="3dp"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:singleLine="true" />
+
+            <ImageButton
+                android:id="@+id/btnNextDay"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="Next Day"
+                app:tint="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <!-- 3. Thẻ Hero Vibrant Card: Cân bằng & Cây Năng Lượng (Thiết kế tinh gọn, tỉ lệ cân đối) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/surface">
+            android:layout_marginVertical="4dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:background="@drawable/bg_hero_card_gradient"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="12dp">
 
-                <!-- Tiêu đề Cân bằng năng lượng kèm Nút Thẻ Ngày & Nút Cài đặt định mức -->
+                <!-- Header Thẻ: Tiêu đề + Nút Thẻ ngày + Nút Định mức -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
 
                     <TextView
+                        android:id="@+id/tvBalanceTitle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/balance_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:singleLine="true" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnDailyWrap"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_marginEnd="6dp"
-                        android:paddingHorizontal="10dp"
+                        android:layout_height="28dp"
+                        android:layout_marginEnd="4dp"
+                        android:paddingHorizontal="8dp"
                         android:paddingVertical="0dp"
                         android:text="@string/daily_wrap_btn"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
                         app:cornerRadius="10dp"
-                        app:strokeColor="?attr/colorPrimary" />
+                        app:strokeColor="#66FFFFFF"
+                        android:backgroundTint="#33FFFFFF" />
 
                     <ImageButton
                         android:id="@+id/btnConfigDay"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_menu_preferences"
+                        android:src="@drawable/ic_tune"
                         android:contentDescription="@string/config_day_title"
-                        app:tint="@color/text_secondary" />
+                        app:tint="@android:color/white" />
                 </LinearLayout>
 
-                <!-- Cây Năng Lượng Banner (Bấm vào để mở Thẻ Ngày) -->
+                <!-- Cây Năng Lượng Banner (Glassmorphism tinh gọn) -->
                 <LinearLayout
                     android:id="@+id/layoutPlantBanner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/bg_plant_banner"
-                    android:padding="12dp"
-                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/bg_hero_glass_badge"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginBottom="8dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <TextView
                         android:id="@+id/tvPlantEmoji"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:gravity="center"
                         android:background="@drawable/bg_wrap_plant_circle"
                         android:text="🌱"
-                        android:textSize="24sp" />
+                        android:textSize="18sp" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="8dp"
                         android:layout_marginEnd="4dp">
 
                         <TextView
@@ -188,26 +195,27 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/plant_seedling_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textColor="@android:color/white"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:singleLine="true" />
 
                         <TextView
                             android:id="@+id/tvPlantSubtitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/plant_seedling_desc"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp"
-                            android:maxLines="2"
+                            android:textColor="#F3E8FF"
+                            android:textSize="11sp"
+                            android:maxLines="1"
                             android:ellipsize="end" />
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:src="@android:drawable/ic_media_play"
-                        app:tint="@color/text_hint" />
+                        app:tint="#F3E8FF" />
                 </LinearLayout>
 
                 <!-- Thanh FOCUS -->
@@ -220,26 +228,27 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/balance_focus"
-                        android:textSize="13sp"
-                        android:textColor="#D32F2F"
+                        android:textSize="12sp"
+                        android:textColor="#FDA4AF"
                         android:textStyle="bold"/>
                     <TextView
                         android:id="@+id/tvFocusTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0h / 4h"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
                         android:textStyle="bold"/>
                 </LinearLayout>
                 <ProgressBar
                     android:id="@+id/pbFocus"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_height="7dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="6dp"
                     android:max="240"
-                    android:progressTint="#D32F2F" />
+                    android:progressDrawable="@drawable/progress_focus_gradient" />
 
                 <!-- Thanh HEALTH -->
                 <LinearLayout
@@ -251,26 +260,27 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/balance_health"
-                        android:textSize="13sp"
-                        android:textColor="#388E3C"
+                        android:textSize="12sp"
+                        android:textColor="#6EE7B7"
                         android:textStyle="bold"/>
                     <TextView
                         android:id="@+id/tvHealthTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0m / 30m"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
                         android:textStyle="bold"/>
                 </LinearLayout>
                 <ProgressBar
                     android:id="@+id/pbHealth"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_height="7dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="6dp"
                     android:max="30"
-                    android:progressTint="#388E3C" />
+                    android:progressDrawable="@drawable/progress_health_gradient" />
 
                 <!-- Thanh LEISURE -->
                 <LinearLayout
@@ -282,47 +292,52 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/balance_leisure"
-                        android:textSize="13sp"
-                        android:textColor="#F57C00"
+                        android:textSize="12sp"
+                        android:textColor="#FDE68A"
                         android:textStyle="bold"/>
                     <TextView
                         android:id="@+id/tvLeisureTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0h / 1.5h"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
                         android:textStyle="bold"/>
                 </LinearLayout>
                 <ProgressBar
                     android:id="@+id/pbLeisure"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_height="7dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="6dp"
                     android:max="90"
-                    android:progressTint="#F57C00" />
+                    android:progressDrawable="@drawable/progress_leisure_gradient" />
 
-                <!-- Dòng nhận xét Insight -->
+                <!-- Dòng nhận xét Insight (Glass pill gọn gàng) -->
                 <TextView
                     android:id="@+id/tvInsight"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_hero_glass_badge"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
                     android:text="@string/insight_perfect"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:textColor="#F5EEFD"
+                    android:textSize="11sp"
                     android:textStyle="italic"
-                    android:layout_marginTop="4dp"/>
+                    android:maxLines="2"
+                    android:ellipsize="end" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 3. Bộ lọc danh mục -->
+        <!-- 4. Bộ lọc danh mục -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
             android:paddingHorizontal="16dp"
-            android:layout_marginBottom="8dp">
+            android:layout_marginVertical="4dp">
 
             <LinearLayout
                 android:id="@+id/layoutCategoryChips"
@@ -332,19 +347,102 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <!-- 4. Tiêu đề danh sách công việc -->
-        <TextView
-            android:id="@+id/tvScheduleHeader"
+        <!-- 5. Tiêu đề danh sách công việc & Dòng thời gian 24h -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="4dp"
-            android:text="@string/todays_schedule"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:paddingTop="4dp"
+            android:paddingBottom="2dp"
+            android:gravity="center_vertical">
 
-        <!-- 5. Danh sách Task -->
+            <TextView
+                android:id="@+id/tvScheduleHeader"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/todays_schedule"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTimelineFree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Thước đo Dòng thời gian 24h thu nhỏ (Timeline Bar) -->
+        <LinearLayout
+            android:id="@+id/layoutTimelineContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="6dp">
+
+            <com.example.dailyscheduleapp.ui.view.TimelineBarView
+                android:id="@+id/timelineBarView"
+                android:layout_width="match_parent"
+                android:layout_height="14dp"
+                android:layout_marginTop="3dp" />
+
+            <!-- Mốc giờ 00h - 06h - 12h - 18h - 24h -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="00h"
+                    android:textColor="@color/text_hint"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="06h"
+                    android:textColor="@color/text_hint"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="12h"
+                    android:textColor="@color/text_hint"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="18h"
+                    android:textColor="@color/text_hint"
+                    android:textSize="9sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="24h"
+                    android:textColor="@color/text_hint"
+                    android:textSize="9sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 6. Danh sách Task chiếm toàn bộ không gian còn lại -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -371,6 +469,7 @@
         </FrameLayout>
     </LinearLayout>
 
+    <!-- Nút Thêm mới Công việc (FAB) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTask"
         android:layout_width="wrap_content"
@@ -380,7 +479,9 @@
         android:layout_marginBottom="72dp"
         android:contentDescription="Add Task"
         android:src="@android:drawable/ic_input_add"
-        app:tint="@color/surface" />
+        app:backgroundTint="@color/primary"
+        app:tint="@android:color/white"
+        app:elevation="4dp" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"

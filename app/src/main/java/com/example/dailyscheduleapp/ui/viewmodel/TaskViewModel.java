@@ -67,4 +67,14 @@ public class TaskViewModel extends AndroidViewModel {
     public void deleteCategory(Category category) {
         repository.deleteCategory(category);
     }
+
+    // Tự động sinh công việc lặp lại khi người dùng mở ngày đó
+    public void ensureRecurringTasksForDate(String targetDate) {
+        repository.ensureRecurringTasksForDate(targetDate);
+    }
+
+    // Kiểm tra trùng giờ với Lịch cố định
+    public void checkTimeConflictWithFixedSchedule(String date, String time, int duration, int currentTaskId, TaskRepository.OnConflictCheckListener listener) {
+        repository.checkTimeConflictWithFixedSchedule(date, time, duration, currentTaskId, listener);
+    }
 }

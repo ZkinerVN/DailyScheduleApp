@@ -1,9 +1,12 @@
 package com.example.dailyscheduleapp.ui.view;
 
+import android.annotation.SuppressLint;
+
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -69,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private String selectedDate; // yyyy-MM-dd
 
     private RecyclerView rvTasks;
-    private TextView tvEmptyState, tvGreeting, tvCurrentDateFull, tvScheduleHeader;
+    private TextView tvEmptyState, tvGreeting, tvCurrentDateFull, tvScheduleHeader, tvTimelineFree;
+    private TimelineBarView timelineBarView;
     private ImageButton btnPrevDay, btnNextDay;
 
     // UI Cân bằng năng lượng
@@ -113,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         setupNotificationSettingsButton();
         setupRecyclerView();
         setupBottomNav();
+        checkPromptPinWidget();
 
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
@@ -152,6 +157,8 @@ public class MainActivity extends AppCompatActivity {
         tvGreeting = findViewById(R.id.tvGreeting);
         tvCurrentDateFull = findViewById(R.id.tvCurrentDateFull);
         tvScheduleHeader = findViewById(R.id.tvScheduleHeader);
+        tvTimelineFree = findViewById(R.id.tvTimelineFree);
+        timelineBarView = findViewById(R.id.timelineBarView);
         btnPrevDay = findViewById(R.id.btnPrevDay);
         btnNextDay = findViewById(R.id.btnNextDay);
 
@@ -388,6 +395,14 @@ public class MainActivity extends AppCompatActivity {
                 if (isCompleted) AlarmScheduler.cancelTaskAlarm(MainActivity.this, task);
                 else AlarmScheduler.scheduleTaskAlarm(MainActivity.this, task);
             }
+
+            @Override
+            public void onTaskPomodoro(Task task) {
+                Intent intent = new Intent(MainActivity.this, PomodoroActivity.class);
+                intent.putExtra("TASK_ID", task.getId());
+                intent.putExtra("TASK_TITLE", task.getTitle());
+                startActivity(intent);
+            }
         });
 
         setupSwipeActions();
@@ -450,6 +465,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateDailyBalance() {
         int focusTotal = 0, healthTotal = 0, leisureTotal = 0;
 
@@ -517,8 +533,32 @@ public class MainActivity extends AppCompatActivity {
         if (tvPlantSubtitle != null) {
             tvPlantSubtitle.setText(getString(currentPlantInfo.descResId) + " (" + currentPlantInfo.balanceScore + "%)");
         }
+        updateTimelineBar();
     }
 
+    private void updateTimelineBar() {
+        if (timelineBarView != null) {
+            String todayStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+            boolean isToday = selectedDate != null && selectedDate.equals(todayStr);
+            timelineBarView.setData(currentDayTasks, categoryMap, isToday);
+
+            if (tvTimelineFree != null) {
+                int occupiedMin = timelineBarView.calculateTotalOccupiedMinutes();
+                int freeMin = Math.max(0, 1440 - occupiedMin);
+                if (freeMin == 0) {
+                    tvTimelineFree.setText(R.string.timeline_all_booked);
+                } else {
+                    float freeHours = freeMin / 60f;
+                    String freeStr = (freeHours == (int) freeHours)
+                            ? String.format(Locale.getDefault(), "%.0fh", freeHours)
+                            : String.format(Locale.getDefault(), "%.1fh", freeHours);
+                    tvTimelineFree.setText(getString(R.string.timeline_free_time, freeStr));
+                }
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
     private void showDayConfigDialog() {
         if (currentDayConfig == null) {
             currentDayConfig = new DayConfig(selectedDate);
@@ -692,10 +732,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+        private void checkPromptPinWidget() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            SharedPreferences prefs = getSharedPreferences("app_preferences", MODE_PRIVATE);
+            boolean hasPrompted = prefs.getBoolean("has_prompted_pin_widget", false);
+            if (hasPrompted) return;
+
+            android.appwidget.AppWidgetManager manager = getSystemService(android.appwidget.AppWidgetManager.class);
+            if (manager != null && manager.isRequestPinAppWidgetSupported()) {
+                prefs.edit().putBoolean("has_prompted_pin_widget", true).apply();
+
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_pin_widget_title)
+                        .setMessage(R.string.dialog_pin_widget_desc)
+                        .setPositiveButton(R.string.btn_add_now, (dialog, which) -> {
+                            com.example.dailyscheduleapp.widget.TodayScheduleWidgetProvider.requestPinWidget(MainActivity.this);
+                        })
+                        .setNegativeButton(R.string.btn_later, (dialog, which) -> dialog.dismiss())
+                        .show();
+            }
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         if (bottomNav != null) bottomNav.setSelectedItemId(R.id.nav_home);
+        com.example.dailyscheduleapp.widget.TodayScheduleWidgetProvider.updateAllWidgets(this);
     }
 }

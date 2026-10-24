@@ -33,6 +33,7 @@ public class BootReceiver extends BroadcastReceiver {
                             AlarmScheduler.scheduleTaskAlarm(context, task);
                         }
                     }
+                    com.example.dailyscheduleapp.widget.TodayScheduleWidgetProvider.updateAllWidgets(context);
                 } finally {
                     pendingResult.finish();
                 }

@@ -33,15 +33,26 @@ public interface TaskDao {
     @Query("SELECT COUNT(*) FROM tasks WHERE isCompleted = 1")
     LiveData<Integer> getCompletedTaskCount();
 
-    // Trong file com.example.dailyscheduleapp.data.dao.TaskDao.java
     @Query("SELECT * FROM tasks WHERE isCompleted = 0")
     List<Task> getPendingTasksSync(); // Trả về List trực tiếp thay vì LiveData
+
     // BroadcastReceiver cập nhật ngầm không cần nạp cả Object Task
     @Query("UPDATE tasks SET isCompleted = 1 WHERE id = :taskId")
     void markTaskAsCompleted(int taskId);
+
     @Query("SELECT * FROM tasks WHERE isCompleted = 0")
     List<Task> getIncompleteTasksSync();
 
     @Query("UPDATE tasks SET actualDuration = actualDuration + :durationMinutes WHERE id = :taskId")
     void addActualDuration(int taskId, int durationMinutes);
+
+    // QUẢN LÝ TỰ ĐỘNG LẶP LẠI (RECURRING)
+    @Query("SELECT * FROM tasks WHERE repeatType > 0 AND parentTaskId = 0")
+    List<Task> getRecurringTemplatesSync();
+
+    @Query("SELECT COUNT(*) FROM tasks WHERE (parentTaskId = :templateId OR id = :templateId) AND date = :targetDate")
+    int countInstancesForDate(int templateId, String targetDate);
+
+    @Query("SELECT * FROM tasks WHERE date = :selectedDate")
+    List<Task> getTasksByDateSync(String selectedDate);
 }

@@ -44,13 +44,13 @@
         <activity
             android:name=".ui.view.StatisticsActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Theme.DailyScheduleApp" />
 
         <!-- Màn hình đồng hồ Pomodoro -->
         <activity
             android:name=".ui.view.PomodoroActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Theme.DailyScheduleApp" />
 
         <!-- Màn hình cài đặt thông báo -->
         <activity
@@ -63,7 +63,7 @@
             android:exported="false"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Theme.DailyScheduleApp" />
 
         <!-- BroadcastReceiver xử lý khi đến giờ hẹn báo thức -->
         <receiver
@@ -86,6 +86,18 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
+        </receiver>
+
+        <!-- App Widget Tiện ích Màn hình chính (Hướng 3) -->
+        <receiver
+            android:name=".widget.TodayScheduleWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_today_schedule_info" />
         </receiver>
 
         <!-- Service đếm giờ Pomodoro chạy nền an toàn -->

@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import com.example.dailyscheduleapp.data.entity.DayConfig;
+
 @Dao
 public interface DayConfigDao {
 
@@ -14,4 +15,7 @@ public interface DayConfigDao {
 
     @Query("SELECT * FROM day_configs WHERE date = :date LIMIT 1")
     LiveData<DayConfig> getDayConfig(String date);
+
+    @Query("SELECT * FROM day_configs WHERE date = :date LIMIT 1")
+    DayConfig getDayConfigSync(String date);
 }

@@ -18,29 +18,62 @@
             android:id="@+id/btnPresetNormal"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:layout_weight="1"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:maxLines="1"
             android:text="@string/config_preset_normal"
-            android:textSize="12sp" />
+            android:textColor="?attr/colorPrimary"
+            android:textSize="11sp"
+            app:cornerRadius="10dp"
+            app:strokeColor="@color/outline" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPresetWeekend"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="4dp"
+            android:layout_height="38dp"
             android:layout_weight="1"
+            android:layout_marginHorizontal="6dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:maxLines="1"
             android:text="@string/config_preset_weekend"
-            android:textSize="12sp" />
+            android:textColor="?attr/colorPrimary"
+            android:textSize="11sp"
+            app:cornerRadius="10dp"
+            app:strokeColor="@color/outline" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPresetExam"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="38dp"
             android:layout_weight="1"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+            android:maxLines="1"
             android:text="@string/config_preset_exam"
-            android:textSize="12sp" />
+            android:textColor="?attr/colorPrimary"
+            android:textSize="11sp"
+            app:cornerRadius="10dp"
+            app:strokeColor="@color/outline" />
     </LinearLayout>
 
     <!-- 1. Hạn mức Tập trung -->

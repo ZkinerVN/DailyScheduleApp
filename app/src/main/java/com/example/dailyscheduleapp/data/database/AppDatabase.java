@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.example.dailyscheduleapp.data.dao.CategoryDao;
 import com.example.dailyscheduleapp.data.dao.DayConfigDao;
@@ -16,8 +17,8 @@ import com.example.dailyscheduleapp.data.entity.Task;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// TĂNG LÊN VERSION 3 ĐỂ TỰ ĐỘNG RESET DỮ LIỆU RÁC TRÙNG LẶP
-@Database(entities = {Task.class, Category.class, DayConfig.class}, version = 3, exportSchema = false)
+// VERSION 4: HỖ TRỢ CÔNG VIỆC LẶP LẠI (REPEATTYPE, PARENTTASKID)
+@Database(entities = {Task.class, Category.class, DayConfig.class}, version = 4, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
@@ -28,6 +29,14 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract DayConfigDao dayConfigDao();
 
     public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(4);
+
+    private static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE tasks ADD COLUMN repeatType INTEGER NOT NULL DEFAULT 0");
+            database.execSQL("ALTER TABLE tasks ADD COLUMN parentTaskId INTEGER NOT NULL DEFAULT 0");
+        }
+    };
 
     public static AppDatabase getInstance(final Context context) {
         if (context != null) {
@@ -41,6 +50,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class,
                                     "daily_schedule_db"
                             )
+                            .addMigrations(MIGRATION_3_4)
                             .fallbackToDestructiveMigration()
                             .addCallback(roomCallback)
                             .build();
@@ -59,16 +69,13 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    private static synchronized void seedDefaultCategories() {
-        if (appContext == null) return;
-
+    private static void seedDefaultCategories() {
         databaseWriteExecutor.execute(() -> {
-            SharedPreferences prefs = appContext.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+            SharedPreferences prefs = appContext.getSharedPreferences("app_preferences", Context.MODE_PRIVATE);
             boolean isSeeded = prefs.getBoolean("categories_seeded_v3", false);
 
             if (!isSeeded) {
-                CategoryDao dao = INSTANCE.categoryDao();
-
+                CategoryDao dao = getInstance(appContext).categoryDao();
                 // DANH MỤC PHỔ THÔNG CHO MỌI ĐỐI TƯỢNG
                 dao.insert(new Category("SYS_STUDY", "#2196F3", 1));    // FOCUS (Xanh dương)
                 dao.insert(new Category("SYS_WORK", "#3F51B5", 1));     // FOCUS (Xanh chàm)
