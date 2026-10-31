@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="5dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="0dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="1dp"
     app:strokeWidth="1dp"
     app:strokeColor="@color/outline"
     app:cardBackgroundColor="@color/surface">
@@ -17,10 +17,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <!-- Dải màu chỉ thị mức độ ưu tiên bên trái (5dp Accent Strip) -->
+        <!-- Dải màu chỉ thị mức độ ưu tiên bên trái (4dp Accent Strip) -->
         <View
             android:id="@+id/viewPriorityStrip"
-            android:layout_width="5dp"
+            android:layout_width="4dp"
             android:layout_height="match_parent"
             android:background="?attr/colorPrimary" />
 
@@ -28,8 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="10dp"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="12dp"
             android:gravity="center_vertical">
 
             <!-- Checkbox trạng thái -->
@@ -47,13 +47,40 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvTitle"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+
+                    <!-- Nhãn Cảnh báo Quá hạn: Nằm cạnh tiêu đề, thẳng hàng, không bao giờ bị bẻ dòng -->
+                    <TextView
+                        android:id="@+id/tvOverdue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/bg_pill_badge"
+                        android:backgroundTint="#FF1744"
+                        android:paddingHorizontal="7dp"
+                        android:paddingVertical="2dp"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="none"
+                        android:text="@string/badge_overdue"
+                        android:textColor="@android:color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvDescription"
@@ -139,23 +166,57 @@
                         android:textSize="9sp"
                         android:textStyle="bold"
                         android:visibility="gone" />
+                </LinearLayout>
+                <!-- Hàng hiển thị Tiến độ Công việc con (Subtasks Progress) -->
+                <LinearLayout
+                    android:id="@+id/layoutSubtasks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-                    <!-- Nhãn Cảnh báo Quá hạn -->
                     <TextView
-                        android:id="@+id/tvOverdue"
+                        android:id="@+id/tvSubtaskBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
                         android:background="@drawable/bg_pill_badge"
-                        android:backgroundTint="#FF1744"
+                        android:backgroundTint="#F1F5F9"
                         android:paddingHorizontal="6dp"
                         android:paddingVertical="2dp"
-                        android:text="@string/badge_overdue"
-                        android:textColor="@android:color/white"
+                        android:textColor="#475569"
                         android:textSize="9sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
+                        android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/pbSubtask"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="4dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="?attr/colorPrimary" />
+
+                    <ImageView
+                        android:id="@+id/ivSubtaskChevron"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="#94A3B8" />
                 </LinearLayout>
+
+                <!-- Danh sách việc con tương tác trực tiếp (Interactive Checklist) -->
+                <LinearLayout
+                    android:id="@+id/layoutSubtaskItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <!-- Nút bắt đầu đếm giờ Pomodoro cho Task -->

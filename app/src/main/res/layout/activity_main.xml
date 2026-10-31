@@ -56,44 +56,109 @@
                 app:tint="?attr/colorPrimary" />
         </LinearLayout>
 
-        <!-- 2. Cụm Điều hướng ngày: [<] [Thứ, Ngày/Tháng 📅] [>] (Hàng riêng biệt, không bị co ép) -->
+        <!-- Banner cảnh báo tối ưu hóa Pin / Báo thức cho thiết bị (Ẩn khi đã tối ưu) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAlarmWarningBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="4dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#FFFBEB"
+            app:strokeColor="#FDE68A"
+            app:strokeWidth="1dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tvAlarmWarningBanner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:textColor="#B45309"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:maxLines="2" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBannerOptimize"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="6dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="0dp"
+                    android:text="@string/alarm_setup_banner_btn"
+                    android:textColor="#B45309"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:strokeColor="#B45309"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 2. Cụm Điều hướng ngày: [<] [Thứ, Ngày/Tháng 📅] [>] (Pill bo tròn hiện đại) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="12dp"
-            android:paddingBottom="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="4dp">
 
-            <ImageButton
-                android:id="@+id/btnPrevDay"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_chevron_left"
-                android:contentDescription="Previous Day"
-                app:tint="?attr/colorPrimary" />
-
-            <TextView
-                android:id="@+id/tvCurrentDateFull"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
+                android:background="@drawable/bg_date_nav_pill"
+                android:gravity="center_vertical"
                 android:paddingHorizontal="6dp"
-                android:paddingVertical="3dp"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:singleLine="true" />
+                android:paddingVertical="2dp"
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/btnNextDay"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_chevron_right"
-                android:contentDescription="Next Day"
-                app:tint="?attr/colorPrimary" />
+                <ImageButton
+                    android:id="@+id/btnPrevDay"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="Previous Day"
+                    app:tint="?attr/colorPrimary" />
+
+                <TextView
+                    android:id="@+id/tvCurrentDateFull"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:singleLine="true" />
+
+                <ImageButton
+                    android:id="@+id/btnNextDay"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="Next Day"
+                    app:tint="?attr/colorPrimary" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- 3. Thẻ Hero Vibrant Card: Cân bằng & Cây Năng Lượng (Thiết kế tinh gọn, tỉ lệ cân đối) -->
@@ -453,7 +518,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="80dp" />
+                android:paddingBottom="100dp" />
 
             <TextView
                 android:id="@+id/tvEmptyState"
@@ -476,7 +541,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="72dp"
+        android:layout_marginBottom="96dp"
         android:contentDescription="Add Task"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="@color/primary"
@@ -486,10 +551,14 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@color/surface"
         app:elevation="8dp"
+        app:labelVisibilityMode="labeled"
+        app:itemIconSize="24dp"
+        app:itemPaddingTop="10dp"
+        app:itemPaddingBottom="12dp"
         app:menu="@menu/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

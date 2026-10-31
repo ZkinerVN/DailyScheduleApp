@@ -7,6 +7,7 @@ import com.example.dailyscheduleapp.data.dao.TaskDao;
 import com.example.dailyscheduleapp.data.database.AppDatabase;
 import com.example.dailyscheduleapp.data.entity.Category;
 import com.example.dailyscheduleapp.data.entity.Task;
+import com.example.dailyscheduleapp.utils.FreeSlotSuggester;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -196,5 +197,19 @@ public class TaskRepository {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    public interface OnFreeSlotsFoundListener {
+        void onResult(List<FreeSlotSuggester.FreeSlot> slots);
+    }
+
+    public void findFreeSlotsForDate(String date, int durationMinutes, int currentTaskId, OnFreeSlotsFoundListener listener) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            List<Task> tasksForDay = taskDao.getTasksByDateSync(date);
+            List<FreeSlotSuggester.FreeSlot> slots = FreeSlotSuggester.findFreeSlots(date, durationMinutes, tasksForDay, currentTaskId);
+            if (listener != null) {
+                listener.onResult(slots);
+            }
+        });
     }
 }

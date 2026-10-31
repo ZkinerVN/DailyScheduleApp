@@ -2,6 +2,8 @@ package com.example.dailyscheduleapp.data.entity;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import com.example.dailyscheduleapp.utils.SubtaskHelper;
+import java.util.List;
 
 @Entity(tableName = "tasks")
 public class Task {
@@ -31,6 +33,9 @@ public class Task {
     // ID của task gốc định nghĩa mẫu lặp (0 nếu là task độc lập/mẫu gốc)
     private int parentTaskId;
 
+    // CÔNG VIỆC CON / CHECKLIST (Lưu trữ danh sách JSON)
+    private String subtasksJson;
+
     // Constructor mặc định
     public Task() {
         this.estimatedDuration = 60; // Mặc định 1 task 60 phút
@@ -40,6 +45,7 @@ public class Task {
         this.isCompleted = false;
         this.repeatType = 0;
         this.parentTaskId = 0;
+        this.subtasksJson = "";
     }
 
     // --- GETTER & SETTER ---
@@ -84,4 +90,31 @@ public class Task {
 
     public int getParentTaskId() { return parentTaskId; }
     public void setParentTaskId(int parentTaskId) { this.parentTaskId = parentTaskId; }
+
+    public String getSubtasksJson() { return subtasksJson != null ? subtasksJson : ""; }
+    public void setSubtasksJson(String subtasksJson) { this.subtasksJson = subtasksJson != null ? subtasksJson : ""; }
+
+    public List<Subtask> getSubtaskList() {
+        return SubtaskHelper.parseSubtasks(this.subtasksJson);
+    }
+
+    public void setSubtaskList(List<Subtask> list) {
+        this.subtasksJson = SubtaskHelper.serializeSubtasks(list);
+    }
+
+    public int getTotalSubtasksCount() {
+        return getSubtaskList().size();
+    }
+
+    public int getCompletedSubtasksCount() {
+        int count = 0;
+        for (Subtask s : getSubtaskList()) {
+            if (s.isCompleted()) count++;
+        }
+        return count;
+    }
+
+    public boolean hasSubtasks() {
+        return subtasksJson != null && !subtasksJson.trim().isEmpty() && !getSubtaskList().isEmpty();
+    }
 }

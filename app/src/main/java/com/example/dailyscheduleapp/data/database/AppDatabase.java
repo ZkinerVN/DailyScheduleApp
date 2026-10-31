@@ -17,8 +17,8 @@ import com.example.dailyscheduleapp.data.entity.Task;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// VERSION 4: HỖ TRỢ CÔNG VIỆC LẶP LẠI (REPEATTYPE, PARENTTASKID)
-@Database(entities = {Task.class, Category.class, DayConfig.class}, version = 4, exportSchema = false)
+// VERSION 5: HỖ TRỢ SUBTASKS / CHECKLIST (SUBTASKSJSON)
+@Database(entities = {Task.class, Category.class, DayConfig.class}, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
@@ -38,6 +38,13 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    private static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE tasks ADD COLUMN subtasksJson TEXT DEFAULT ''");
+        }
+    };
+
     public static AppDatabase getInstance(final Context context) {
         if (context != null) {
             appContext = context.getApplicationContext();
@@ -50,7 +57,7 @@ public abstract class AppDatabase extends RoomDatabase {
                                     AppDatabase.class,
                                     "daily_schedule_db"
                             )
-                            .addMigrations(MIGRATION_3_4)
+                            .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
                             .fallbackToDestructiveMigration()
                             .addCallback(roomCallback)
                             .build();

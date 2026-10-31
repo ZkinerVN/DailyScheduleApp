@@ -37,6 +37,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dailyscheduleapp.R;
+import com.example.dailyscheduleapp.utils.DeviceCompatibilityHelper;
+import com.google.android.material.card.MaterialCardView;
 import com.example.dailyscheduleapp.data.database.AppDatabase;
 import com.example.dailyscheduleapp.data.entity.Category;
 import com.example.dailyscheduleapp.data.entity.DayConfig;
@@ -75,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvEmptyState, tvGreeting, tvCurrentDateFull, tvScheduleHeader, tvTimelineFree;
     private TimelineBarView timelineBarView;
     private ImageButton btnPrevDay, btnNextDay;
+    private MaterialCardView cardAlarmWarningBanner;
+    private TextView tvAlarmWarningBanner;
+    private View btnBannerOptimize;
 
     // UI Cân bằng năng lượng
     private TextView tvFocusTime, tvHealthTime, tvLeisureTime, tvInsight;
@@ -109,8 +114,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         requestNotificationPermission();
         NotificationSettings.ensureChannels(this);
-        checkExactAlarmPermission();
-        checkBatteryOptimization();
+
+
 
         initViews();
         setupLanguageSwitch();
@@ -161,6 +166,9 @@ public class MainActivity extends AppCompatActivity {
         timelineBarView = findViewById(R.id.timelineBarView);
         btnPrevDay = findViewById(R.id.btnPrevDay);
         btnNextDay = findViewById(R.id.btnNextDay);
+        cardAlarmWarningBanner = findViewById(R.id.cardAlarmWarningBanner);
+        tvAlarmWarningBanner = findViewById(R.id.tvAlarmWarningBanner);
+        btnBannerOptimize = findViewById(R.id.btnBannerOptimize);
 
         rvTasks = findViewById(R.id.rvTasks);
         tvEmptyState = findViewById(R.id.tvEmptyState);
@@ -380,6 +388,8 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("EXTRA_INCLUDE_BALANCE", task.isIncludeInBalance());
                 intent.putExtra("EXTRA_IS_COMPLETED", task.isCompleted());
                 intent.putExtra("EXTRA_ACTUAL_DURATION", task.getActualDuration());
+                intent.putExtra("EXTRA_SUBTASKS_JSON", task.getSubtasksJson());
+                intent.putExtra("EXTRA_REPEAT_TYPE", task.getRepeatType());
                 startActivity(intent);
             }
 
@@ -402,6 +412,11 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("TASK_ID", task.getId());
                 intent.putExtra("TASK_TITLE", task.getTitle());
                 startActivity(intent);
+            }
+
+            @Override
+            public void onSubtaskStatusChanged(Task task) {
+                taskViewModel.updateTask(task);
             }
         });
 
@@ -679,60 +694,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void checkExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.permission_exact_alarm_title)
-                        .setMessage(R.string.permission_exact_alarm_desc)
-                        .setPositiveButton(R.string.permission_grant, (dialog, which) -> {
-                            try {
-                                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                intent.setData(Uri.parse("package:" + getPackageName()));
-                                startActivity(intent);
-                            } catch (Exception e) {
-                                try {
-                                    Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                    startActivity(intent);
-                                } catch (Exception ignored) {}
-                            }
-                        })
-                        .setNegativeButton(R.string.btn_cancel, null)
-                        .show();
-            }
-        }
-    }
-
-    private void checkBatteryOptimization() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            if (pm != null && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
-                boolean askedBefore = getSharedPreferences("app_preferences", MODE_PRIVATE)
-                        .getBoolean("battery_opt_prompted", false);
-                if (!askedBefore) {
-                    getSharedPreferences("app_preferences", MODE_PRIVATE).edit()
-                            .putBoolean("battery_opt_prompted", true)
-                            .apply();
-
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.permission_battery_opt_title)
-                            .setMessage(R.string.permission_battery_opt_desc)
-                            .setPositiveButton(R.string.permission_grant, (dialog, which) -> {
-                                try {
-                                    Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                                    intent.setData(Uri.parse("package:" + getPackageName()));
-                                    startActivity(intent);
-                                } catch (Exception ignored) {}
-                            })
-                            .setNegativeButton(R.string.btn_cancel, null)
-                            .show();
+    private void checkUnifiedAlarmSetup() {
+        boolean fullyOptimized = DeviceCompatibilityHelper.isFullyOptimized(this);
+        if (cardAlarmWarningBanner != null) {
+            if (fullyOptimized) {
+                cardAlarmWarningBanner.setVisibility(View.GONE);
+            } else {
+                cardAlarmWarningBanner.setVisibility(View.VISIBLE);
+                if (tvAlarmWarningBanner != null) {
+                    tvAlarmWarningBanner.setText(getString(R.string.alarm_setup_banner_warning));
                 }
+                View.OnClickListener openDialog = v -> AlarmSetupDialog.show(this, this::checkUnifiedAlarmSetup);
+                cardAlarmWarningBanner.setOnClickListener(openDialog);
+                if (btnBannerOptimize != null) btnBannerOptimize.setOnClickListener(openDialog);
+            }
+        }
+
+        if (!fullyOptimized) {
+            boolean prompted = getSharedPreferences("app_preferences", MODE_PRIVATE)
+                    .getBoolean("unified_alarm_setup_prompted", false);
+            if (!prompted) {
+                getSharedPreferences("app_preferences", MODE_PRIVATE).edit()
+                        .putBoolean("unified_alarm_setup_prompted", true)
+                        .apply();
+                AlarmSetupDialog.show(this, this::checkUnifiedAlarmSetup);
             }
         }
     }
 
-        private void checkPromptPinWidget() {
+    private void checkPromptPinWidget() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             SharedPreferences prefs = getSharedPreferences("app_preferences", MODE_PRIVATE);
             boolean hasPrompted = prefs.getBoolean("has_prompted_pin_widget", false);
@@ -757,6 +747,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkUnifiedAlarmSetup();
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         if (bottomNav != null) bottomNav.setSelectedItemId(R.id.nav_home);
         com.example.dailyscheduleapp.widget.TodayScheduleWidgetProvider.updateAllWidgets(this);

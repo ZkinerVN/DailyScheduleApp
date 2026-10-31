@@ -77,4 +77,9 @@ public class TaskViewModel extends AndroidViewModel {
     public void checkTimeConflictWithFixedSchedule(String date, String time, int duration, int currentTaskId, TaskRepository.OnConflictCheckListener listener) {
         repository.checkTimeConflictWithFixedSchedule(date, time, duration, currentTaskId, listener);
     }
+
+    // Tìm kiếm các khung giờ rảnh trong ngày
+    public void findFreeSlotsForDate(String date, int durationMinutes, int currentTaskId, TaskRepository.OnFreeSlotsFoundListener listener) {
+        repository.findFreeSlotsForDate(date, durationMinutes, currentTaskId, listener);
+    }
 }

@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation("org.json:json:20231013")
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
     // Architecture Components: ViewModel & LiveData

@@ -1,6 +1,7 @@
 package com.example.dailyscheduleapp.ui.view;
 
 import android.annotation.SuppressLint;
+import com.example.dailyscheduleapp.utils.DeviceCompatibilityHelper;
 
 import android.Manifest;
 import android.app.AlarmManager;
@@ -41,6 +42,12 @@ import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
 import com.example.dailyscheduleapp.utils.AlarmScheduler;
 import com.google.android.material.card.MaterialCardView;
 
+import android.graphics.Paint;
+import android.widget.CheckBox;
+import com.example.dailyscheduleapp.data.entity.Subtask;
+import com.example.dailyscheduleapp.utils.FreeSlotSuggester;
+import com.example.dailyscheduleapp.utils.SubtaskHelper;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +80,13 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private int existingActualDuration = 0;
     private int initialRepeatType = 0;
 
+    // Quản lý việc con (Subtasks)
+    private LinearLayout layoutSubtaskList;
+    private EditText edtNewSubtask;
+    private ImageButton btnAddSubtask;
+    private TextView tvSubtaskProgress;
+    private final List<Subtask> subtaskList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +107,26 @@ public class AddEditTaskActivity extends AppCompatActivity {
         btnAddCategory = findViewById(R.id.btnAddCategory);
         cardConflictWarning = findViewById(R.id.cardConflictWarning);
         tvConflictWarning = findViewById(R.id.tvConflictWarning);
+
+        layoutSubtaskList = findViewById(R.id.layoutSubtaskList);
+        edtNewSubtask = findViewById(R.id.edtNewSubtask);
+        btnAddSubtask = findViewById(R.id.btnAddSubtask);
+        tvSubtaskProgress = findViewById(R.id.tvSubtaskProgress);
+
+        if (btnAddSubtask != null) {
+            btnAddSubtask.setOnClickListener(v -> addNewSubtask());
+        }
+        if (edtNewSubtask != null) {
+            edtNewSubtask.setOnEditorActionListener((v, actionId, event) -> {
+                addNewSubtask();
+                return true;
+            });
+        }
+
+        Button btnSuggestTime = findViewById(R.id.btnSuggestTime);
+        if (btnSuggestTime != null) {
+            btnSuggestTime.setOnClickListener(v -> suggestFreeTimeSlots());
+        }
 
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
@@ -173,6 +207,12 @@ public class AddEditTaskActivity extends AppCompatActivity {
             initialRepeatType = intent.getIntExtra("EXTRA_REPEAT_TYPE", 0);
             if (initialRepeatType >= 0 && initialRepeatType < spinnerRepeat.getCount()) {
                 spinnerRepeat.setSelection(initialRepeatType);
+            }
+            if (intent.hasExtra("EXTRA_SUBTASKS_JSON")) {
+                String subtasksJson = intent.getStringExtra("EXTRA_SUBTASKS_JSON");
+                subtaskList.clear();
+                subtaskList.addAll(SubtaskHelper.parseSubtasks(subtasksJson));
+                renderSubtasks();
             }
             btnSave.setText(getString(R.string.btn_save_task));
             checkTimeConflict();
@@ -444,6 +484,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         taskToSave.setCompleted(existingIsCompleted);
         taskToSave.setActualDuration(existingActualDuration);
         taskToSave.setRepeatType(repeatType);
+        taskToSave.setSubtaskList(subtaskList);
 
         Context appContext = getApplicationContext();
         if (currentTaskId == -1) {
@@ -460,86 +501,138 @@ public class AddEditTaskActivity extends AppCompatActivity {
             }
         }
 
-        // Kiểm tra quyền "Thông báo" và "Báo thức & lời nhắc"
-        boolean hasNotification = isNotificationPermissionGranted();
-        boolean hasExactAlarm = isExactAlarmPermissionGranted();
-
-        if (hasNotification && hasExactAlarm) {
+        // Kiểm tra tối ưu hóa thiết bị toàn diện (Hợp nhất 1 chạm cho mọi dòng máy)
+        if (DeviceCompatibilityHelper.isFullyOptimized(this)) {
             Toast.makeText(this, getString(R.string.task_saved_success), Toast.LENGTH_SHORT).show();
             finish();
+        } else {
+            Toast.makeText(this, getString(R.string.task_saved_success), Toast.LENGTH_SHORT).show();
+            AlarmSetupDialog.show(this, this::finish);
+        }
+    }
+
+    // --- QUẢN LÝ CÔNG VIỆC CON (SUBTASKS) ---
+
+    private void addNewSubtask() {
+        if (edtNewSubtask == null) return;
+        String title = edtNewSubtask.getText().toString().trim();
+        if (title.isEmpty()) {
+            Toast.makeText(this, getString(R.string.subtask_empty_warning), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        subtaskList.add(new Subtask(title, false));
+        edtNewSubtask.setText("");
+        renderSubtasks();
+    }
+
+    private void renderSubtasks() {
+        if (layoutSubtaskList == null) return;
+        layoutSubtaskList.removeAllViews();
+        for (int i = 0; i < subtaskList.size(); i++) {
+            Subtask s = subtaskList.get(i);
+            final int index = i;
+
+            View itemView = getLayoutInflater().inflate(R.layout.item_subtask_edit, layoutSubtaskList, false);
+            CheckBox cb = itemView.findViewById(R.id.cbSubtask);
+            TextView tvTitle = itemView.findViewById(R.id.tvSubtaskTitle);
+            ImageButton btnDelete = itemView.findViewById(R.id.btnDeleteSubtask);
+
+            tvTitle.setText(s.getTitle());
+            cb.setOnCheckedChangeListener(null);
+            cb.setChecked(s.isCompleted());
+            updateSubtaskTextStyle(tvTitle, s.isCompleted());
+
+            View.OnClickListener toggleClick = v -> {
+                boolean nextState = !cb.isChecked();
+                cb.setChecked(nextState);
+                s.setCompleted(nextState);
+                updateSubtaskTextStyle(tvTitle, nextState);
+                updateSubtaskProgress();
+            };
+
+            cb.setOnClickListener(toggleClick);
+            tvTitle.setOnClickListener(toggleClick);
+            itemView.setOnClickListener(toggleClick);
+
+            btnDelete.setOnClickListener(v -> {
+                subtaskList.remove(index);
+                renderSubtasks();
+            });
+
+            layoutSubtaskList.addView(itemView);
+        }
+        updateSubtaskProgress();
+    }
+
+    private void updateSubtaskTextStyle(TextView tv, boolean isDone) {
+        if (isDone) {
+            tv.setPaintFlags(tv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            tv.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+        } else {
+            tv.setPaintFlags(tv.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            tv.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateSubtaskProgress() {
+        if (tvSubtaskProgress == null) return;
+        if (subtaskList.isEmpty()) {
+            tvSubtaskProgress.setVisibility(View.GONE);
+            return;
+        }
+        tvSubtaskProgress.setVisibility(View.VISIBLE);
+        int done = 0;
+        for (Subtask s : subtaskList) {
+            if (s.isCompleted()) done++;
+        }
+        tvSubtaskProgress.setText(done + "/" + subtaskList.size());
+    }
+
+    // --- GỢI Ý KHUNG GIỜ RẢNH (FREE SLOT SUGGESTER) ---
+
+    private void suggestFreeTimeSlots() {
+        if (selectedDate == null || selectedDate.trim().isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_select_datetime), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Hướng dẫn người dùng mở công tắc ngay nếu chưa bật
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(false);
+        int duration = 60;
+        try {
+            String durStr = edtDuration.getText().toString().trim();
+            if (!durStr.isEmpty()) duration = Integer.parseInt(durStr);
+        } catch (Exception ignored) {}
 
-        if (!hasNotification && !hasExactAlarm) {
-            builder.setTitle(R.string.dialog_permission_both_title)
-                    .setMessage(R.string.dialog_permission_both_desc)
-                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
-                        openNotificationSettings();
-                        openExactAlarmSettings();
-                        finish();
-                    });
-        } else if (!hasNotification) {
-            builder.setTitle(R.string.dialog_permission_notification_title)
-                    .setMessage(R.string.dialog_permission_notification_desc)
-                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
-                        openNotificationSettings();
-                        finish();
-                    });
-        } else {
-            builder.setTitle(R.string.dialog_permission_exact_alarm_title)
-                    .setMessage(R.string.dialog_permission_exact_alarm_desc)
-                    .setPositiveButton(R.string.btn_open_toggle_now, (dialog, which) -> {
-                        openExactAlarmSettings();
-                        finish();
-                    });
-        }
+        final int dur = duration;
+        taskViewModel.findFreeSlotsForDate(selectedDate, duration, currentTaskId, slots -> {
+            runOnUiThread(() -> {
+                if (slots == null || slots.isEmpty()) {
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.dialog_free_slots_title)
+                            .setMessage(getString(R.string.no_free_slots_found, dur))
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                    return;
+                }
 
-        builder.setNegativeButton(R.string.btn_later, (dialog, which) -> {
-            dialog.dismiss();
-            finish();
+                String[] items = new String[slots.size()];
+                for (int i = 0; i < slots.size(); i++) {
+                    FreeSlotSuggester.FreeSlot slot = slots.get(i);
+                    items[i] = "🟢 " + slot.getFormattedDisplay(this);
+                }
+
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_free_slots_title)
+                        .setItems(items, (dialog, which) -> {
+                            FreeSlotSuggester.FreeSlot chosen = slots.get(which);
+                            selectedTime = chosen.getStartTime();
+                            updateDateTimeText();
+                            checkTimeConflict();
+                            Toast.makeText(this, getString(R.string.toast_slot_selected, selectedTime), Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton(R.string.btn_cancel, null)
+                        .show();
+            });
         });
-
-        builder.show();
-    }
-
-    private boolean isNotificationPermissionGranted() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
-        }
-        return NotificationManagerCompat.from(this).areNotificationsEnabled();
-    }
-
-    private boolean isExactAlarmPermissionGranted() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            return alarmManager != null && alarmManager.canScheduleExactAlarms();
-        }
-        return true;
-    }
-
-    private void openNotificationSettings() {
-        Intent intent = new Intent();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-            intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-        } else {
-            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-        }
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
-    private void openExactAlarmSettings() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
     }
 }

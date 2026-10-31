@@ -50,6 +50,7 @@ public class AlarmScheduler {
         intent.putExtra("TASK_TITLE", task.getTitle());
         intent.putExtra("TASK_DESC", task.getDescription());
         intent.putExtra("TASK_PRIORITY", task.getPriority());
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -65,6 +66,7 @@ public class AlarmScheduler {
 
         // Intent khi người dùng bấm vào biểu tượng báo thức trên thanh trạng thái
         Intent showIntent = new Intent(context, MainActivity.class);
+        showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent showPendingIntent = PendingIntent.getActivity(
                 context,
                 task.getId(),

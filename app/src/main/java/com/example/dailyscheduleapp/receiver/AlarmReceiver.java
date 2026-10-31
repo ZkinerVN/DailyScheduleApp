@@ -71,6 +71,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     snoozeIntent.putExtra("TASK_TITLE", title);
                     snoozeIntent.putExtra("TASK_DESC", desc);
                     snoozeIntent.putExtra("TASK_PRIORITY", priority);
+                    snoozeIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
 
                     int flags = PendingIntent.FLAG_UPDATE_CURRENT;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;

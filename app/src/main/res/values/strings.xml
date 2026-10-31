@@ -198,7 +198,8 @@
     <string name="permission_exact_alarm_desc">To ensure reminders ring accurately on time when your screen is off or the app is closed, please allow "Alarms &amp; reminders" for Daily Schedule.</string>
     <string name="permission_grant">Allow</string>
     <string name="permission_battery_opt_title">Unrestricted Background Activity</string>
-    <string name="permission_battery_opt_desc">To prevent your device (Nubia, Xiaomi, etc.) from canceling alarms when clearing recent apps, please allow unrestricted background activity for this app.</string>
+    <string name="permission_battery_opt_desc">To prevent your device from canceling alarms when clearing recent apps, please allow unrestricted background activity for this app.</string>
+    <string name="btn_battery_opt_settings">Battery Optimization &amp; Exact Alarm</string>
     <string name="task_saved_success">Task saved successfully</string>
     <string name="dialog_permission_both_title">Enable Notifications &amp; Alarms</string>
     <string name="dialog_permission_both_desc">Task saved. However, to ring and wake the screen on time when locked, please enable \"Notifications\" and \"Alarms &amp; reminders\" in Settings.</string>
@@ -295,4 +296,28 @@
     <string name="stats_garden_blooming">🌸 Blooming: %1$d days</string>
     <string name="stats_garden_growing">🌳 Growing: %1$d days</string>
     <string name="stats_garden_thirsty">💧 Thirsty: %1$d days</string>
+    <string name="subtasks_title">Subtasks / Checklist</string>
+    <string name="subtask_add_hint">Add subtask (e.g. Read docs...)</string>
+    <string name="cd_add_subtask">Add subtask</string>
+    <string name="cd_delete_subtask">Delete subtask</string>
+    <string name="subtasks_progress_format">☑ %1$d/%2$d done</string>
+    <string name="subtask_empty_warning">Please enter subtask title</string>
+    <string name="btn_suggest_free_time">⚡ Suggest Free Slot</string>
+    <string name="dialog_free_slots_title">Available Free Slots</string>
+    <string name="no_free_slots_found">No free slot of %1$d minutes available on this day.</string>
+    <string name="slot_morning">Morning</string>
+    <string name="slot_afternoon">Afternoon</string>
+    <string name="slot_evening">Evening</string>
+    <string name="toast_slot_selected">Selected slot: %1$s</string>
+    <!-- Universal Cross-OEM Alarm Setup Strings -->
+    <string name="dialog_alarm_setup_title">Accurate Alarm Setup</string>
+    <string name="dialog_alarm_setup_desc">To make sure alarms ring on time on your device even when the screen is locked or the app is closed, please complete this quick setup:</string>
+    <string name="alarm_setup_step_notif">Notification Display</string>
+    <string name="alarm_setup_step_battery">Unrestricted Background Activity</string>
+    <string name="alarm_setup_step_exact">Exact Alarms &amp; Reminders</string>
+    <string name="alarm_setup_btn_one_tap">⚡ ACTIVATE 1-TAP (RECOMMENDED)</string>
+    <string name="alarm_setup_status_ok">Active</string>
+    <string name="alarm_setup_status_need_action">Action needed</string>
+    <string name="alarm_setup_banner_warning">Alarms may be delayed due to device battery optimization</string>
+    <string name="alarm_setup_banner_btn">Optimize</string>
 </resources>
