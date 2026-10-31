@@ -90,9 +90,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    app:indicatorColor="@color/brand_primary"
+                    app:indicatorColor="?attr/colorPrimary"
                     app:indicatorSize="260dp"
-                    app:trackColor="@color/surface_variant"
+                    app:trackColor="?attr/colorSurfaceVariant"
                     app:trackCornerRadius="8dp"
                     app:trackThickness="12dp" />
 

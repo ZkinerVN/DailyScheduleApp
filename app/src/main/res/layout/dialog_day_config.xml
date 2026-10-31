@@ -81,7 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/config_focus_limit_label"
-        android:textColor="#D32F2F"
+        android:textColor="@color/accent_focus"
         android:textStyle="bold"
         android:textSize="13sp" />
 
@@ -89,6 +89,9 @@
         android:id="@+id/etFocusLimit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:hint="@string/config_focus_limit_label"
+        android:contentDescription="@string/config_focus_limit_label"
         android:inputType="number"
         android:layout_marginBottom="12dp" />
 
@@ -97,7 +100,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/config_health_goal_label"
-        android:textColor="#388E3C"
+        android:textColor="@color/accent_health"
         android:textStyle="bold"
         android:textSize="13sp" />
 
@@ -105,6 +108,9 @@
         android:id="@+id/etHealthGoal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:hint="@string/config_health_goal_label"
+        android:contentDescription="@string/config_health_goal_label"
         android:inputType="number"
         android:layout_marginBottom="12dp" />
 
@@ -113,7 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/config_leisure_limit_label"
-        android:textColor="#F57C00"
+        android:textColor="@color/accent_leisure"
         android:textStyle="bold"
         android:textSize="13sp" />
 
@@ -121,6 +127,9 @@
         android:id="@+id/etLeisureLimit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:hint="@string/config_leisure_limit_label"
+        android:contentDescription="@string/config_leisure_limit_label"
         android:inputType="number" />
 
 </LinearLayout>

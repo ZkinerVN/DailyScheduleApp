@@ -299,6 +299,7 @@
     <string name="subtasks_title">Subtasks / Checklist</string>
     <string name="subtask_add_hint">Add subtask (e.g. Read docs...)</string>
     <string name="cd_add_subtask">Add subtask</string>
+    <string name="cd_add_task">Add new task</string>
     <string name="cd_delete_subtask">Delete subtask</string>
     <string name="subtasks_progress_format">☑ %1$d/%2$d done</string>
     <string name="subtask_empty_warning">Please enter subtask title</string>
@@ -320,4 +321,12 @@
     <string name="alarm_setup_status_need_action">Action needed</string>
     <string name="alarm_setup_banner_warning">Alarms may be delayed due to device battery optimization</string>
     <string name="alarm_setup_banner_btn">Optimize</string>
+    <!-- Discard Changes Dialog Strings -->
+    <string name="discard_dialog_title">Discard changes?</string>
+    <string name="discard_dialog_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="discard_dialog_positive">Discard</string>
+    <string name="discard_dialog_negative">Keep editing</string>
+    <!-- Accessibility Content Descriptions -->
+    <string name="cd_prev_day">Previous day</string>
+    <string name="cd_next_day">Next day</string>
 </resources>

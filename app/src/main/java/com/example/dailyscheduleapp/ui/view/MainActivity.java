@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -402,8 +403,12 @@ public class MainActivity extends AppCompatActivity {
             public void onTaskStatusChanged(Task task, boolean isCompleted) {
                 task.setCompleted(isCompleted);
                 taskViewModel.updateTask(task);
-                if (isCompleted) AlarmScheduler.cancelTaskAlarm(MainActivity.this, task);
-                else AlarmScheduler.scheduleTaskAlarm(MainActivity.this, task);
+                if (isCompleted) {
+                    AlarmScheduler.cancelTaskAlarm(MainActivity.this, task);
+                    dismissTaskNotification(task.getId());
+                } else {
+                    AlarmScheduler.scheduleTaskAlarm(MainActivity.this, task);
+                }
             }
 
             @Override
@@ -670,6 +675,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void deleteTaskWithUndo(Task task) {
         AlarmScheduler.cancelTaskAlarm(this, task);
+        dismissTaskNotification(task.getId());
         taskViewModel.deleteTask(task);
         String message = getString(R.string.task_deleted, task.getTitle());
         Snackbar snackbar = Snackbar.make(rvTasks, message, Snackbar.LENGTH_LONG)
@@ -683,6 +689,15 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         if (bottomNav != null) snackbar.setAnchorView(bottomNav);
         snackbar.show();
+    }
+
+    private void dismissTaskNotification(int taskId) {
+        if (taskId != -1) {
+            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm != null) {
+                nm.cancel(taskId);
+            }
+        }
     }
 
     private void requestNotificationPermission() {

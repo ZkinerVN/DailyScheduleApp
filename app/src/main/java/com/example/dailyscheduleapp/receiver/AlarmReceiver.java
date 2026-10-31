@@ -189,11 +189,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
 
         Notification notification = builder.build();
-        if (priority == 3) {
-            // Cờ FLAG_INSISTENT yêu cầu hệ thống lặp lại âm thanh thông báo cho đến khi người dùng thao tác
-            notification.flags |= Notification.FLAG_INSISTENT;
-        }
-
         notificationManager.notify(taskId, notification);
 
         // Với mức Cao (3): Kích hoạt mở thẳng màn hình AlarmAlertActivity

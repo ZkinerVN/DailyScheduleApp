@@ -5,6 +5,7 @@ import com.example.dailyscheduleapp.utils.DeviceCompatibilityHelper;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -29,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -150,8 +152,15 @@ public class AddEditTaskActivity extends AppCompatActivity {
         }
         Button btnCancel = findViewById(R.id.btnCancel);
         if (btnCancel != null) {
-            btnCancel.setOnClickListener(v -> finish());
+            btnCancel.setOnClickListener(v -> confirmDiscard());
         }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                confirmDiscard();
+            }
+        });
 
         edtDuration.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -498,6 +507,8 @@ public class AddEditTaskActivity extends AppCompatActivity {
                 AlarmScheduler.scheduleTaskAlarm(this, taskToSave);
             } else {
                 AlarmScheduler.cancelTaskAlarm(this, taskToSave);
+                NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (nm != null) nm.cancel(taskToSave.getId());
             }
         }
 
@@ -508,6 +519,22 @@ public class AddEditTaskActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, getString(R.string.task_saved_success), Toast.LENGTH_SHORT).show();
             AlarmSetupDialog.show(this, this::finish);
+        }
+    }
+
+    private void confirmDiscard() {
+        String title = edtTitle != null ? edtTitle.getText().toString().trim() : "";
+        String desc = edtDescription != null ? edtDescription.getText().toString().trim() : "";
+        boolean hasContent = !title.isEmpty() || !desc.isEmpty() || (subtaskList != null && !subtaskList.isEmpty());
+        if (hasContent) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.discard_dialog_title)
+                    .setMessage(R.string.discard_dialog_message)
+                    .setPositiveButton(R.string.discard_dialog_positive, (dialog, which) -> finish())
+                    .setNegativeButton(R.string.discard_dialog_negative, null)
+                    .show();
+        } else {
+            finish();
         }
     }
 
@@ -522,6 +549,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
         }
         subtaskList.add(new Subtask(title, false));
         edtNewSubtask.setText("");
+        edtNewSubtask.requestFocus();
         renderSubtasks();
     }
 

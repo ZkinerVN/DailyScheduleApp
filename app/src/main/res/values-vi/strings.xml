@@ -300,6 +300,7 @@
     <string name="subtasks_title">Công việc con / Checklist</string>
     <string name="subtask_add_hint">Thêm việc con (VD: Đọc tài liệu...)</string>
     <string name="cd_add_subtask">Thêm việc con</string>
+    <string name="cd_add_task">Thêm công việc mới</string>
     <string name="cd_delete_subtask">Xóa việc con</string>
     <string name="subtasks_progress_format">☑ %1$d/%2$d việc</string>
     <string name="subtask_empty_warning">Vui lòng nhập nội dung việc con</string>
@@ -321,4 +322,12 @@
     <string name="alarm_setup_status_need_action">Cần bật</string>
     <string name="alarm_setup_banner_warning">Chuông báo có thể trễ do chế độ tiết kiệm pin của thiết bị</string>
     <string name="alarm_setup_banner_btn">Tối ưu ngay</string>
+    <!-- Discard Changes Dialog Strings -->
+    <string name="discard_dialog_title">Hủy thay đổi?</string>
+    <string name="discard_dialog_message">Bạn có các thay đổi chưa được lưu. Bạn có chắc chắn muốn hủy không?</string>
+    <string name="discard_dialog_positive">Hủy thay đổi</string>
+    <string name="discard_dialog_negative">Tiếp tục sửa</string>
+    <!-- Accessibility Content Descriptions -->
+    <string name="cd_prev_day">Ngày trước</string>
+    <string name="cd_next_day">Ngày tiếp theo</string>
 </resources>
