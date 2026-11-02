@@ -297,13 +297,7 @@
     <string name="stats_garden_blooming">🌸 Nở hoa rực rỡ: %1$d ngày</string>
     <string name="stats_garden_growing">🌳 Xanh tốt: %1$d ngày</string>
     <string name="stats_garden_thirsty">💧 Khát nước: %1$d ngày</string>
-    <string name="subtasks_title">Công việc con / Checklist</string>
-    <string name="subtask_add_hint">Thêm việc con (VD: Đọc tài liệu...)</string>
-    <string name="cd_add_subtask">Thêm việc con</string>
     <string name="cd_add_task">Thêm công việc mới</string>
-    <string name="cd_delete_subtask">Xóa việc con</string>
-    <string name="subtasks_progress_format">☑ %1$d/%2$d việc</string>
-    <string name="subtask_empty_warning">Vui lòng nhập nội dung việc con</string>
     <string name="btn_suggest_free_time">⚡ Gợi ý giờ rảnh</string>
     <string name="dialog_free_slots_title">Khung giờ rảnh trong ngày</string>
     <string name="no_free_slots_found">Không tìm thấy khung giờ rảnh nào đủ %1$d phút trong ngày này.</string>

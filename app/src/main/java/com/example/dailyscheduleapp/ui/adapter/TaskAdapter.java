@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dailyscheduleapp.R;
 import com.example.dailyscheduleapp.data.entity.Category;
-import com.example.dailyscheduleapp.data.entity.Subtask;
 import com.example.dailyscheduleapp.data.entity.Task;
 import com.google.android.material.card.MaterialCardView;
 
@@ -59,7 +58,6 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
                     && oldItem.getEstimatedDuration() == newItem.getEstimatedDuration()
                     && oldItem.getActualDuration() == newItem.getActualDuration()
                     && oldItem.isIncludeInBalance() == newItem.isIncludeInBalance()
-                    && Objects.equals(oldItem.getSubtasksJson(), newItem.getSubtasksJson())
                     && oldItem.getRepeatType() == newItem.getRepeatType();
         }
     };
@@ -73,7 +71,6 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
         void onTaskDelete(Task task);
         void onTaskStatusChanged(Task task, boolean isCompleted);
         void onTaskPomodoro(Task task);
-        void onSubtaskStatusChanged(Task task);
     }
 
     public void setOnTaskClickListener(OnTaskClickListener listener) {
@@ -119,7 +116,13 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
         holder.cardTask.setCardBackgroundColor(ContextCompat.getColor(context, R.color.surface));
 
         holder.tvTitle.setText(task.getTitle());
-        holder.tvDescription.setText(task.getDescription());
+        String desc = task.getDescription();
+        if (desc != null && !desc.trim().isEmpty()) {
+            holder.tvDescription.setText(desc);
+            holder.tvDescription.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvDescription.setVisibility(View.GONE);
+        }
         holder.tvDateTime.setText(task.getTime());
 
         // 1. Hiển thị Mức ưu tiên với Badge bo tròn & Dải màu Accent Strip
@@ -223,104 +226,6 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
             holder.btnPomodoro.setVisibility(View.VISIBLE);
         }
 
-        // 6. Hiển thị & Tương tác Danh sách Công việc con (Subtasks Checklist)
-        if (task.hasSubtasks()) {
-            holder.layoutSubtasks.setVisibility(View.VISIBLE);
-            holder.layoutSubtaskItems.setVisibility(View.VISIBLE);
-            if (holder.ivSubtaskChevron != null) {
-                holder.ivSubtaskChevron.setRotation(90f);
-            }
-
-            final List<Subtask> subtasks = task.getSubtaskList();
-            final int total = subtasks.size();
-            int done = 0;
-            for (Subtask s : subtasks) {
-                if (s.isCompleted()) done++;
-            }
-
-            holder.tvSubtaskBadge.setText(context.getString(R.string.subtasks_progress_format, done, total));
-            holder.pbSubtask.setMax(Math.max(1, total));
-            holder.pbSubtask.setProgress(done);
-            if (done == total && total > 0) {
-                holder.pbSubtask.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#059669")));
-            } else {
-                holder.pbSubtask.setProgressTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(context, R.color.brand_primary)));
-            }
-
-            // Render từng đầu việc con tương tác trực tiếp
-            holder.layoutSubtaskItems.removeAllViews();
-            LayoutInflater inflater = LayoutInflater.from(context);
-            for (int i = 0; i < subtasks.size(); i++) {
-                final int subtaskIndex = i;
-                final Subtask s = subtasks.get(i);
-                View subtaskView = inflater.inflate(R.layout.item_subtask_card, holder.layoutSubtaskItems, false);
-                CheckBox cbSubtaskItem = subtaskView.findViewById(R.id.cbSubtaskItem);
-                TextView tvSubtaskTitle = subtaskView.findViewById(R.id.tvSubtaskItemTitle);
-
-                tvSubtaskTitle.setText(s.getTitle());
-                cbSubtaskItem.setOnCheckedChangeListener(null);
-                cbSubtaskItem.setChecked(s.isCompleted());
-                if (s.isCompleted()) {
-                    tvSubtaskTitle.setPaintFlags(tvSubtaskTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    tvSubtaskTitle.setTextColor(ContextCompat.getColor(context, R.color.text_secondary));
-                } else {
-                    tvSubtaskTitle.setPaintFlags(tvSubtaskTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                    tvSubtaskTitle.setTextColor(ContextCompat.getColor(context, R.color.text_primary));
-                }
-
-                View.OnClickListener toggleSubtask = v -> {
-                    boolean nextStatus = !cbSubtaskItem.isChecked();
-                    cbSubtaskItem.setChecked(nextStatus);
-                    s.setCompleted(nextStatus);
-                    if (nextStatus) {
-                        tvSubtaskTitle.setPaintFlags(tvSubtaskTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                        tvSubtaskTitle.setTextColor(ContextCompat.getColor(context, R.color.text_secondary));
-                    } else {
-                        tvSubtaskTitle.setPaintFlags(tvSubtaskTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                        tvSubtaskTitle.setTextColor(ContextCompat.getColor(context, R.color.text_primary));
-                    }
-                    task.setSubtaskList(subtasks);
-
-                    int currentDone = 0;
-                    for (Subtask item : subtasks) {
-                        if (item.isCompleted()) currentDone++;
-                    }
-                    holder.tvSubtaskBadge.setText(context.getString(R.string.subtasks_progress_format, currentDone, total));
-                    holder.pbSubtask.setProgress(currentDone);
-                    if (currentDone == total && total > 0) {
-                        holder.pbSubtask.setProgressTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#059669")));
-                    } else {
-                        holder.pbSubtask.setProgressTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(context, R.color.brand_primary)));
-                    }
-
-                    if (listener != null) {
-                        listener.onSubtaskStatusChanged(task);
-                    }
-                };
-
-                subtaskView.setOnClickListener(toggleSubtask);
-                cbSubtaskItem.setOnClickListener(toggleSubtask);
-                tvSubtaskTitle.setOnClickListener(toggleSubtask);
-
-                holder.layoutSubtaskItems.addView(subtaskView);
-            }
-
-            // Click vào thanh tiến độ để thu gọn / mở rộng danh sách việc con
-            holder.layoutSubtasks.setOnClickListener(v -> {
-                if (holder.layoutSubtaskItems.getVisibility() == View.VISIBLE) {
-                    holder.layoutSubtaskItems.setVisibility(View.GONE);
-                    if (holder.ivSubtaskChevron != null) holder.ivSubtaskChevron.setRotation(0f);
-                } else {
-                    holder.layoutSubtaskItems.setVisibility(View.VISIBLE);
-                    if (holder.ivSubtaskChevron != null) holder.ivSubtaskChevron.setRotation(90f);
-                }
-            });
-        } else {
-            holder.layoutSubtasks.setVisibility(View.GONE);
-            holder.layoutSubtaskItems.setVisibility(View.GONE);
-            holder.layoutSubtasks.setOnClickListener(null);
-        }
-
         holder.cbCompleted.setOnClickListener(v -> {
             boolean isChecked = holder.cbCompleted.isChecked();
             task.setCompleted(isChecked);
@@ -387,12 +292,8 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
         MaterialCardView cardTask;
         View viewPriorityStrip;
         CheckBox cbCompleted;
-        TextView tvTitle, tvDescription, tvDateTime, tvPriority, tvCategory, tvRepeat, tvCompletedBadge, tvOverdue, tvSubtaskBadge;
+        TextView tvTitle, tvDescription, tvDateTime, tvPriority, tvCategory, tvRepeat, tvCompletedBadge, tvOverdue;
         ImageButton btnPomodoro, btnDelete;
-        View layoutSubtasks;
-        ProgressBar pbSubtask;
-        ImageView ivSubtaskChevron;
-        LinearLayout layoutSubtaskItems;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -409,11 +310,6 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
             tvOverdue = itemView.findViewById(R.id.tvOverdue);
             btnPomodoro = itemView.findViewById(R.id.btnPomodoro);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-            layoutSubtasks = itemView.findViewById(R.id.layoutSubtasks);
-            tvSubtaskBadge = itemView.findViewById(R.id.tvSubtaskBadge);
-            pbSubtask = itemView.findViewById(R.id.pbSubtask);
-            ivSubtaskChevron = itemView.findViewById(R.id.ivSubtaskChevron);
-            layoutSubtaskItems = itemView.findViewById(R.id.layoutSubtaskItems);
         }
     }
 }

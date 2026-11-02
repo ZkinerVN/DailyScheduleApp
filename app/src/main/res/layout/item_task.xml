@@ -30,13 +30,15 @@
             android:orientation="horizontal"
             android:paddingHorizontal="14dp"
             android:paddingVertical="12dp"
-            android:gravity="center_vertical">
+            android:gravity="top">
 
             <!-- Checkbox trạng thái -->
             <CheckBox
                 android:id="@+id/cbCompleted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="2dp"
                 android:layout_marginEnd="6dp"
                 app:buttonTint="?attr/colorPrimary" />
 
@@ -92,12 +94,13 @@
                     android:maxLines="1"
                     android:ellipsize="end" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <!-- Hàng hiển thị Tags: Tự động xuống dòng mượt mà khi tràn chiều ngang -->
+                <com.google.android.material.chip.ChipGroup
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center_vertical">
+                    android:layout_marginTop="6dp"
+                    app:chipSpacingHorizontal="5dp"
+                    app:chipSpacingVertical="4dp">
 
                     <!-- Tag Giờ hẹn -->
                     <TextView
@@ -109,46 +112,55 @@
                         android:paddingVertical="2dp"
                         android:textColor="?attr/colorPrimary"
                         android:textSize="10sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <!-- Tag Danh mục -->
                     <TextView
                         android:id="@+id/tvCategory"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
                         android:background="@drawable/bg_pill_badge"
                         android:paddingHorizontal="7dp"
                         android:paddingVertical="2dp"
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <!-- Tag Ưu tiên -->
                     <TextView
                         android:id="@+id/tvPriority"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
                         android:background="@drawable/bg_priority_low"
                         android:paddingHorizontal="7dp"
                         android:paddingVertical="2dp"
                         android:textColor="#059669"
                         android:textSize="10sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <!-- Tag Lặp lại (Recurring) -->
                     <TextView
                         android:id="@+id/tvRepeat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
                         android:background="@drawable/bg_pill_badge"
                         android:paddingHorizontal="6dp"
                         android:paddingVertical="2dp"
                         android:textColor="?attr/colorPrimary"
                         android:textSize="9sp"
                         android:textStyle="bold"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:visibility="gone" />
 
                     <!-- Tag Đã hoàn thành -->
@@ -156,7 +168,6 @@
                         android:id="@+id/tvCompletedBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
                         android:background="@drawable/bg_pill_badge"
                         android:backgroundTint="#E2E8F0"
                         android:paddingHorizontal="6dp"
@@ -165,58 +176,11 @@
                         android:textColor="#64748B"
                         android:textSize="9sp"
                         android:textStyle="bold"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         android:visibility="gone" />
-                </LinearLayout>
-                <!-- Hàng hiển thị Tiến độ Công việc con (Subtasks Progress) -->
-                <LinearLayout
-                    android:id="@+id/layoutSubtasks"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/tvSubtaskBadge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_pill_badge"
-                        android:backgroundTint="#F1F5F9"
-                        android:paddingHorizontal="6dp"
-                        android:paddingVertical="2dp"
-                        android:textColor="#475569"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
-
-                    <ProgressBar
-                        android:id="@+id/pbSubtask"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="0dp"
-                        android:layout_height="4dp"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:max="100"
-                        android:progress="0"
-                        android:progressTint="?attr/colorPrimary" />
-
-                    <ImageView
-                        android:id="@+id/ivSubtaskChevron"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginStart="4dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#94A3B8" />
-                </LinearLayout>
-
-                <!-- Danh sách việc con tương tác trực tiếp (Interactive Checklist) -->
-                <LinearLayout
-                    android:id="@+id/layoutSubtaskItems"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:orientation="vertical"
-                    android:visibility="gone" />
+                </com.google.android.material.chip.ChipGroup>
             </LinearLayout>
 
             <!-- Nút bắt đầu đếm giờ Pomodoro cho Task -->
@@ -224,6 +188,7 @@
                 android:id="@+id/btnPomodoro"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_gravity="top"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_nav_timer"
                 android:contentDescription="Pomodoro"
@@ -234,6 +199,7 @@
                 android:id="@+id/btnDelete"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
+                android:layout_gravity="top"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_delete_outline"
                 android:contentDescription="@string/cd_delete_task"

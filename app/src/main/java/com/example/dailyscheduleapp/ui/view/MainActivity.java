@@ -389,7 +389,6 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("EXTRA_INCLUDE_BALANCE", task.isIncludeInBalance());
                 intent.putExtra("EXTRA_IS_COMPLETED", task.isCompleted());
                 intent.putExtra("EXTRA_ACTUAL_DURATION", task.getActualDuration());
-                intent.putExtra("EXTRA_SUBTASKS_JSON", task.getSubtasksJson());
                 intent.putExtra("EXTRA_REPEAT_TYPE", task.getRepeatType());
                 startActivity(intent);
             }
@@ -419,10 +418,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
 
-            @Override
-            public void onSubtaskStatusChanged(Task task) {
-                taskViewModel.updateTask(task);
-            }
         });
 
         setupSwipeActions();

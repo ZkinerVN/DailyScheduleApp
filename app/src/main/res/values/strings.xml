@@ -296,13 +296,7 @@
     <string name="stats_garden_blooming">🌸 Blooming: %1$d days</string>
     <string name="stats_garden_growing">🌳 Growing: %1$d days</string>
     <string name="stats_garden_thirsty">💧 Thirsty: %1$d days</string>
-    <string name="subtasks_title">Subtasks / Checklist</string>
-    <string name="subtask_add_hint">Add subtask (e.g. Read docs...)</string>
-    <string name="cd_add_subtask">Add subtask</string>
     <string name="cd_add_task">Add new task</string>
-    <string name="cd_delete_subtask">Delete subtask</string>
-    <string name="subtasks_progress_format">☑ %1$d/%2$d done</string>
-    <string name="subtask_empty_warning">Please enter subtask title</string>
     <string name="btn_suggest_free_time">⚡ Suggest Free Slot</string>
     <string name="dialog_free_slots_title">Available Free Slots</string>
     <string name="no_free_slots_found">No free slot of %1$d minutes available on this day.</string>

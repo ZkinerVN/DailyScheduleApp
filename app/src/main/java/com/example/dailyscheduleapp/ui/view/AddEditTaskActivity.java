@@ -44,11 +44,7 @@ import com.example.dailyscheduleapp.ui.viewmodel.TaskViewModel;
 import com.example.dailyscheduleapp.utils.AlarmScheduler;
 import com.google.android.material.card.MaterialCardView;
 
-import android.graphics.Paint;
-import android.widget.CheckBox;
-import com.example.dailyscheduleapp.data.entity.Subtask;
 import com.example.dailyscheduleapp.utils.FreeSlotSuggester;
-import com.example.dailyscheduleapp.utils.SubtaskHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,12 +78,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private int existingActualDuration = 0;
     private int initialRepeatType = 0;
 
-    // Quản lý việc con (Subtasks)
-    private LinearLayout layoutSubtaskList;
-    private EditText edtNewSubtask;
-    private ImageButton btnAddSubtask;
-    private TextView tvSubtaskProgress;
-    private final List<Subtask> subtaskList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,20 +100,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         cardConflictWarning = findViewById(R.id.cardConflictWarning);
         tvConflictWarning = findViewById(R.id.tvConflictWarning);
 
-        layoutSubtaskList = findViewById(R.id.layoutSubtaskList);
-        edtNewSubtask = findViewById(R.id.edtNewSubtask);
-        btnAddSubtask = findViewById(R.id.btnAddSubtask);
-        tvSubtaskProgress = findViewById(R.id.tvSubtaskProgress);
-
-        if (btnAddSubtask != null) {
-            btnAddSubtask.setOnClickListener(v -> addNewSubtask());
-        }
-        if (edtNewSubtask != null) {
-            edtNewSubtask.setOnEditorActionListener((v, actionId, event) -> {
-                addNewSubtask();
-                return true;
-            });
-        }
 
         Button btnSuggestTime = findViewById(R.id.btnSuggestTime);
         if (btnSuggestTime != null) {
@@ -216,12 +192,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
             initialRepeatType = intent.getIntExtra("EXTRA_REPEAT_TYPE", 0);
             if (initialRepeatType >= 0 && initialRepeatType < spinnerRepeat.getCount()) {
                 spinnerRepeat.setSelection(initialRepeatType);
-            }
-            if (intent.hasExtra("EXTRA_SUBTASKS_JSON")) {
-                String subtasksJson = intent.getStringExtra("EXTRA_SUBTASKS_JSON");
-                subtaskList.clear();
-                subtaskList.addAll(SubtaskHelper.parseSubtasks(subtasksJson));
-                renderSubtasks();
             }
             btnSave.setText(getString(R.string.btn_save_task));
             checkTimeConflict();
@@ -493,7 +463,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         taskToSave.setCompleted(existingIsCompleted);
         taskToSave.setActualDuration(existingActualDuration);
         taskToSave.setRepeatType(repeatType);
-        taskToSave.setSubtaskList(subtaskList);
 
         Context appContext = getApplicationContext();
         if (currentTaskId == -1) {
@@ -525,7 +494,7 @@ public class AddEditTaskActivity extends AppCompatActivity {
     private void confirmDiscard() {
         String title = edtTitle != null ? edtTitle.getText().toString().trim() : "";
         String desc = edtDescription != null ? edtDescription.getText().toString().trim() : "";
-        boolean hasContent = !title.isEmpty() || !desc.isEmpty() || (subtaskList != null && !subtaskList.isEmpty());
+        boolean hasContent = !title.isEmpty() || !desc.isEmpty();
         if (hasContent) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.discard_dialog_title)
@@ -536,85 +505,6 @@ public class AddEditTaskActivity extends AppCompatActivity {
         } else {
             finish();
         }
-    }
-
-    // --- QUẢN LÝ CÔNG VIỆC CON (SUBTASKS) ---
-
-    private void addNewSubtask() {
-        if (edtNewSubtask == null) return;
-        String title = edtNewSubtask.getText().toString().trim();
-        if (title.isEmpty()) {
-            Toast.makeText(this, getString(R.string.subtask_empty_warning), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        subtaskList.add(new Subtask(title, false));
-        edtNewSubtask.setText("");
-        edtNewSubtask.requestFocus();
-        renderSubtasks();
-    }
-
-    private void renderSubtasks() {
-        if (layoutSubtaskList == null) return;
-        layoutSubtaskList.removeAllViews();
-        for (int i = 0; i < subtaskList.size(); i++) {
-            Subtask s = subtaskList.get(i);
-            final int index = i;
-
-            View itemView = getLayoutInflater().inflate(R.layout.item_subtask_edit, layoutSubtaskList, false);
-            CheckBox cb = itemView.findViewById(R.id.cbSubtask);
-            TextView tvTitle = itemView.findViewById(R.id.tvSubtaskTitle);
-            ImageButton btnDelete = itemView.findViewById(R.id.btnDeleteSubtask);
-
-            tvTitle.setText(s.getTitle());
-            cb.setOnCheckedChangeListener(null);
-            cb.setChecked(s.isCompleted());
-            updateSubtaskTextStyle(tvTitle, s.isCompleted());
-
-            View.OnClickListener toggleClick = v -> {
-                boolean nextState = !cb.isChecked();
-                cb.setChecked(nextState);
-                s.setCompleted(nextState);
-                updateSubtaskTextStyle(tvTitle, nextState);
-                updateSubtaskProgress();
-            };
-
-            cb.setOnClickListener(toggleClick);
-            tvTitle.setOnClickListener(toggleClick);
-            itemView.setOnClickListener(toggleClick);
-
-            btnDelete.setOnClickListener(v -> {
-                subtaskList.remove(index);
-                renderSubtasks();
-            });
-
-            layoutSubtaskList.addView(itemView);
-        }
-        updateSubtaskProgress();
-    }
-
-    private void updateSubtaskTextStyle(TextView tv, boolean isDone) {
-        if (isDone) {
-            tv.setPaintFlags(tv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            tv.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
-        } else {
-            tv.setPaintFlags(tv.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
-            tv.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void updateSubtaskProgress() {
-        if (tvSubtaskProgress == null) return;
-        if (subtaskList.isEmpty()) {
-            tvSubtaskProgress.setVisibility(View.GONE);
-            return;
-        }
-        tvSubtaskProgress.setVisibility(View.VISIBLE);
-        int done = 0;
-        for (Subtask s : subtaskList) {
-            if (s.isCompleted()) done++;
-        }
-        tvSubtaskProgress.setText(done + "/" + subtaskList.size());
     }
 
     // --- GỢI Ý KHUNG GIỜ RẢNH (FREE SLOT SUGGESTER) ---
